@@ -1382,13 +1382,6 @@ function renderInspector(){
   const ramp = R[S.sel.ramp] || R.brand;
   const st = at(ramp, S.sel.step) || at(ramp, 500);
   const host = $('#inspBody'); host.innerHTML = '';
-  host.append(el('div',{class:'row',style:'gap:8px;margin-bottom:12px'},[
-    el('span',{style:'width:40px;height:40px;border-radius:8px;border:1px solid var(--border);background:'+st.hex}),
-    el('div',{},[
-      el('div',{class:'label',text:(RAMP_LABEL[S.sel.ramp] || 'Accent ' + S.sel.ramp.replace('accent','')) + ' ' + st.step}),
-      el('div',{class:'ms mut mono',text:st.hex + (st.locked ? ' · locked' : '')})
-    ])
-  ]));
   const isRoot = ramp.id === 'brand' && st.step === 500;
   const setStop = (L,C,H) => {
     const hex = oklchToHex(L, clamp(C,0,maxChroma(L,H)), H);
@@ -1407,6 +1400,46 @@ function renderInspector(){
     if (isRoot) return MODEL.brand;
     const k = S.locks[ramp.id + ':' + st.step]; return k ? hexToOklch(k) : {L:st.L,C:st.C,H:st.H};
   };
+  const setHex = hex => { const o = hexToOklch(hex); setStop(o.L, o.C, o.H); };
+
+  const hexInput = el('input',{type:'text', class:'mono', 'aria-label':'Hex value',
+    style:'height:32px;border-radius:8px;background:var(--bg-surface);border:1px solid var(--border);'+
+      'padding:0 8px;width:100%;font-family:var(--font-mono);font-variant-numeric:tabular-nums'});
+  const okHex = c => oklchToHex(c.L, c.C, c.H);
+  hexInput.value = okHex(cur());
+  const swatchEl = el('span',{id:'inspector-swatch', class:'inspector-swatch',
+    style:'width:40px;height:40px;border-radius:8px;border:1px solid var(--border);background-color:'+st.hex+';flex:none;margin-top:2px'});
+  const paintSwatch = hex => { swatchEl.style.backgroundColor = hex; };
+  const flagInvalid = bad => {
+    hexInput.style.borderColor = bad ? '#dc2626' : '';
+    hexInput.style.boxShadow = bad ? '0 0 0 3px rgb(220 38 38 / .35)' : '';
+  };
+  const commitHex = () => {
+    const raw = hexInput.value.trim();
+    const p = parseColor(raw) || parseColor(raw.startsWith('#') ? raw : '#' + raw);
+    if (!p || p.fmt !== 'hex'){ flagInvalid(true); return; }
+    flagInvalid(false);
+    paintSwatch(p.hex);
+    setHex(p.hex);
+  };
+  hexInput.addEventListener('input', commitHex);
+  hexInput.addEventListener('change', () => { commitHex(); hexInput.value = okHex(cur()); flagInvalid(false); });
+  hexInput.addEventListener('keydown', e => { if (e.key === 'Enter'){ commitHex(); hexInput.blur(); } });
+  const hexWrap = el('div',{class:'sl', style:'flex:1;min-width:0'});
+  hexWrap.update = () => {
+    const hex = okHex(cur());
+    paintSwatch(hex);
+    if (document.activeElement !== hexInput) { hexInput.value = hex; flagInvalid(false); }
+  };
+  hexWrap.append(el('div',{},[
+    el('div',{class:'label',text:(RAMP_LABEL[S.sel.ramp] || 'Accent ' + S.sel.ramp.replace('accent','')) + ' ' + st.step}),
+    el('div',{style:'margin-top:4px'},[hexInput]),
+    st.locked ? el('div',{class:'ms mut mono',style:'margin-top:2px',text:'locked'}) : null
+  ]));
+  host.append(el('div',{class:'row',style:'gap:8px;margin-bottom:12px;align-items:flex-start'},[
+    swatchEl,
+    hexWrap
+  ]));
   host.append(
     slider({label:'Lightness', min:0.05, max:0.99, step:0.01, dec:3,
       get:()=>cur().L, set:v=>{const c=cur(); setStop(v,c.C,c.H);},
