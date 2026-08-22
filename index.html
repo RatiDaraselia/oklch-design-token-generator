@@ -1,0 +1,1640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Color system generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --n0:#fdfdfd; --n25:#fafafa; --n50:#f6f6f6; --n100:#ededed; --n150:#dfdfdf; --n200:#cfcfcf;
+  --n300:#b7b7b7; --n400:#9e9e9e; --n500:#808080; --n600:#636363; --n700:#484848; --n800:#2e2e2e;
+  --n900:#1b1b1b; --n950:#0d0d0d;
+  --a50:#eef0f4; --a100:#dce4ef; --a500:#2c80f6; --a600:#1b6bd7; --a700:#1c58ab;
+  --e50:#f4efee; --e100:#efdfdd; --e600:#ca252d; --e700:#a22528;
+  --w50:#f4efea; --w100:#efe1ce; --w600:#93661c; --w700:#76531c;
+  --s50:#e8f4e9; --s100:#c6f0cb; --s600:#21863c; --s700:#216c33;
+
+  --bg-page:var(--n0); --bg-panel:var(--n25); --bg-surface:#ffffff; --bg-subtle:var(--n50);
+  --bg-hover:var(--n100); --bg-active:var(--n150);
+  --text-primary:var(--n900); --text-secondary:var(--n600); --text-muted:var(--n500); --text-eyebrow:var(--n400);
+  --border:var(--n150); --border-strong:var(--n200);
+  --ring:rgb(44 128 246 / .35);
+  --shadow:0 1px 2px rgb(0 0 0 / .04), 0 8px 24px rgb(0 0 0 / .08);
+  --font-sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',ui-monospace,'SF Mono',Menlo,monospace;
+  --fast:120ms cubic-bezier(.2,0,0,1); --med:180ms cubic-bezier(.2,0,0,1); --slow:240ms cubic-bezier(.2,0,0,1);
+}
+:root.dark{
+  --bg-page:#0d0d0e; --bg-panel:#141416; --bg-surface:#1a1b1c; --bg-subtle:#212224;
+  --bg-hover:#2a2b2d; --bg-active:#2d2e2f;
+  --text-primary:#eceded; --text-secondary:#9d9ea1; --text-muted:#7e8083; --text-eyebrow:#7e8083;
+  --border:#2d2e2f; --border-strong:#3a3b3e;
+  --e50:#2a1a1a; --e100:#3a1f21; --e700:#e88a8c; --w50:#241d14; --w100:#33281a; --w700:#dcb478;
+  --s50:#132218; --s100:#1b3324; --s700:#8fd7a2;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg-page); color:var(--text-primary);
+  font-family:var(--font-sans); font-size:15px; line-height:1.65; font-weight:400;
+  font-feature-settings:'cv05' 1,'ss03' 1;
+  -webkit-font-smoothing:antialiased;
+}
+.mono,input.mono,.mono *{font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-feature-settings:'tnum' 1}
+h1,h2,h3{margin:0; font-weight:600}
+h1{font-size:30px; line-height:1.2; letter-spacing:-.02em}
+h2{font-size:20px; line-height:1.3; letter-spacing:-.011em}
+h3{font-size:16px; line-height:1.45; letter-spacing:-.006em}
+p{margin:0}
+a{color:var(--a600); text-decoration:none}
+a:hover{color:var(--a700); text-decoration:underline}
+:root.dark a{color:var(--a500)}
+button{font-family:inherit; font-size:13px; font-weight:500; cursor:pointer; border:0; background:none; color:inherit}
+input,textarea,select{font-family:inherit; font-size:13px; color:var(--text-primary)}
+:focus-visible{outline:none; box-shadow:0 0 0 3px var(--ring); border-color:var(--a600)}
+.eyebrow{font-size:11px; line-height:1.2; font-weight:500; letter-spacing:.07em; text-transform:uppercase; color:var(--text-eyebrow)}
+.label{font-size:13px; line-height:1.4; font-weight:500}
+.cap{font-size:12px; line-height:1.45; color:var(--text-secondary)}
+.sm{font-size:13.5px; line-height:1.6}
+.sec{color:var(--text-secondary)}
+.mut{color:var(--text-muted)}
+.mv{font-size:13px; line-height:1.5}
+.ms{font-size:12px; line-height:1.5}
+
+/* header */
+.hdr{position:sticky; top:0; z-index:40; height:56px; display:flex; align-items:center; gap:12px;
+  padding:0 16px; background:var(--bg-page); border-bottom:1px solid var(--border)}
+.crumb{font-size:13px; color:var(--text-muted); display:flex; gap:6px; align-items:center}
+.crumb b{font-weight:400; color:var(--text-primary)}
+.hdr .grow{flex:1}
+.iconbtn{width:32px; height:32px; border-radius:6px; display:grid; place-items:center; color:var(--text-secondary);
+  transition:background var(--fast),color var(--fast)}
+.iconbtn:hover{background:var(--bg-hover); color:var(--text-primary)}
+.iconbtn[aria-pressed="true"]{background:var(--bg-active); color:var(--text-primary)}
+svg{display:block}
+
+/* app shell */
+.app{display:grid; grid-template-columns:256px minmax(0,1fr) 248px; align-items:start}
+.side{position:sticky; top:56px; height:calc(100vh - 56px); overflow-y:auto; background:var(--bg-panel);
+  border-right:1px solid var(--border); padding:16px 12px 32px}
+.insp{position:sticky; top:56px; height:calc(100vh - 56px); overflow-y:auto; background:var(--bg-page);
+  border-left:1px solid var(--border); padding:16px 12px 32px}
+main{display:flex; justify-content:center; padding:48px 24px 96px}
+.col{width:100%; max-width:760px}
+section.blk{margin-bottom:56px}
+section.blk>h2+p{margin-top:8px}
+section.blk>h2+p+*{margin-top:24px}
+section.blk>h2+*:not(p){margin-top:24px}
+.sub{margin-top:32px}
+.row{display:flex; align-items:center; gap:8px}
+.rowb{display:flex; align-items:baseline; gap:8px}
+.between{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.wrap{display:flex; flex-wrap:wrap; gap:8px}
+
+/* components */
+.card{background:var(--bg-surface); border:1px solid var(--border); border-radius:10px; padding:20px}
+.card>h3+p{margin-top:4px}
+.card .body{margin-top:16px}
+.btn{height:32px; padding:0 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;
+  transition:background var(--fast),border-color var(--fast)}
+.btn.pri{background:var(--n900); color:var(--n0)}
+.btn.pri:hover{background:var(--n800)}
+:root.dark .btn.pri{background:var(--n0); color:var(--n950)}
+:root.dark .btn.pri:hover{background:var(--n150)}
+.btn.sec{background:var(--bg-surface); border:1px solid var(--border); color:var(--text-primary)}
+.btn.sec:hover{background:var(--bg-subtle)}
+.btn.ghost{color:var(--text-secondary)}
+.btn.ghost:hover{background:var(--bg-hover)}
+.seg{display:inline-flex; gap:0; background:var(--bg-subtle); border-radius:8px; padding:3px}
+.seg button{height:28px; padding:0 10px; border-radius:6px; color:var(--text-secondary); transition:background var(--fast),color var(--fast)}
+.seg button[aria-pressed="true"]{background:var(--bg-surface); color:var(--text-primary);
+  box-shadow:0 1px 2px rgb(0 0 0 / .04), 0 4px 12px rgb(0 0 0 / .04)}
+.tabs{display:flex; gap:0; border-bottom:1px solid var(--border)}
+.tabs button{height:36px; padding:0 12px; color:var(--text-secondary); border-bottom:2px solid transparent; margin-bottom:-1px}
+.tabs button[aria-selected="true"]{color:var(--text-primary); border-bottom-color:var(--a600)}
+input[type=text],input[type=number],textarea,select{
+  height:32px; background:var(--bg-surface); border:1px solid var(--border); border-radius:8px;
+  padding:0 8px; width:100%; transition:border-color var(--fast)}
+textarea{height:auto; padding:8px; line-height:1.6; resize:vertical}
+.chip{display:inline-flex; align-items:center; gap:6px; height:24px; padding:0 8px; border-radius:4px;
+  background:var(--bg-subtle); font-size:12px; font-family:var(--font-mono); font-variant-numeric:tabular-nums}
+.chip.tok{background:var(--a50); color:var(--a700)}
+:root.dark .chip.tok{background:#16233a; color:#9dc0f7}
+hr{border:0; border-top:1px solid var(--border); margin:16px 0}
+
+/* sidebar */
+.brandfield{height:40px; display:flex; align-items:center; gap:8px; background:var(--bg-surface);
+  border:1px solid var(--border); border-radius:8px; padding:0 8px}
+.brandfield .sw{width:24px; height:24px; border-radius:4px; border:1px solid rgb(0 0 0 / .12); flex:none}
+.brandfield input{border:0; background:none; height:38px; padding:0; font-family:var(--font-mono);
+  font-variant-numeric:tabular-nums; font-size:13px; width:100%}
+.brandfield input:focus-visible{box-shadow:none}
+.brandfield:focus-within{box-shadow:0 0 0 3px var(--ring); border-color:var(--a600)}
+.navtree{margin-top:8px}
+.navgrp{margin-top:16px}
+.navgrp>.eyebrow{margin-bottom:8px; padding:0 8px}
+.navitem{display:flex; align-items:center; gap:8px; width:100%; height:32px; padding:0 8px; border-radius:6px;
+  font-size:13px; font-weight:500; color:var(--text-secondary); text-align:left; position:relative;
+  transition:background var(--fast),color var(--fast)}
+.navitem:hover{background:var(--bg-hover)}
+.navitem[aria-current="true"]{background:var(--bg-active); color:var(--text-primary)}
+.navitem[aria-current="true"]::before{content:""; position:absolute; left:0; top:6px; bottom:6px; width:2px;
+  border-radius:1px; background:var(--a600)}
+.nested{margin-left:12px; padding-left:12px; border-left:1px solid var(--border)}
+.navitem .dot{width:12px; height:12px; border-radius:3px; border:1px solid rgb(0 0 0 / .12); flex:none}
+.sigread{margin-top:8px; display:grid; gap:0}
+.sigread div{display:flex; justify-content:space-between; padding:6px 8px; border-bottom:1px solid var(--border)}
+.sigread div:last-child{border-bottom:0}
+.sigread span:first-child{font-size:12px; color:var(--text-secondary)}
+.sigread span:last-child{font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:12px}
+
+/* ramps */
+.strip{display:grid; grid-template-columns:repeat(11,1fr); border-radius:8px; overflow:hidden}
+.strip .stop{height:72px; position:relative; display:flex; flex-direction:column; justify-content:space-between;
+  padding:6px; cursor:pointer; border:0}
+.strip .stop .n,.strip .stop .h{font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:12px; line-height:1.5}
+.strip .stop .h{font-size:11px; opacity:.9}
+.strip .stop[data-sel="1"]{box-shadow:inset 0 0 0 2px var(--text-primary)}
+.strip .stop .lk{position:absolute; top:4px; right:4px; opacity:0; width:20px; height:20px; display:grid; place-items:center; border-radius:4px}
+.strip .stop:hover .lk,.strip .stop .lk[data-on="1"]{opacity:1}
+.vramp{border-radius:8px; overflow:hidden; border:1px solid var(--border)}
+.vramp .vstop{height:72px; display:flex; align-items:center; gap:12px; padding:0 16px; width:100%; border:0; cursor:pointer; text-align:left}
+.vramp .vstop[data-sel="1"]{box-shadow:inset 0 0 0 2px var(--text-primary)}
+.vramp .vstop .n{width:36px; font-family:var(--font-mono); font-size:13px; font-variant-numeric:tabular-nums}
+.vramp .vstop .hx{width:80px; font-family:var(--font-mono); font-size:13px; font-variant-numeric:tabular-nums}
+.vramp .vstop .ok{flex:1; font-family:var(--font-mono); font-size:12px; font-variant-numeric:tabular-nums; opacity:.85}
+.vramp .vstop .cr{font-family:var(--font-mono); font-size:12px; font-variant-numeric:tabular-nums; opacity:.85}
+.vramp .vstop .acts{width:56px; display:flex; gap:4px; justify-content:flex-end; opacity:0; transition:opacity var(--fast)}
+.vramp .vstop:hover .acts,.vramp .vstop .acts[data-on="1"]{opacity:1}
+.rampmeta{display:flex; align-items:center; gap:8px; margin-bottom:8px}
+
+/* slider */
+.sl{padding:10px 0; border-bottom:1px solid var(--border)}
+.sl:last-child{border-bottom:0}
+.sl .top{display:flex; align-items:center; justify-content:space-between; gap:8px}
+.sl .top label{font-size:12px; color:var(--text-muted)}
+.sl .top input{width:74px; height:24px; text-align:right; font-family:var(--font-mono); font-size:12px;
+  font-variant-numeric:tabular-nums; border-radius:6px; padding:0 6px}
+.sl .trackrow{display:flex; align-items:center; gap:0; margin-top:12px; height:16px}
+.sl .track{position:relative; height:6px; border-radius:999px; cursor:pointer}
+.sl .track.reach{flex:1 1 auto}
+.sl .stub{height:6px; border-radius:999px; background:var(--bg-subtle); border:1px solid var(--border);
+  border-left:0; flex:0 0 auto}
+.sl .thumb{position:absolute; top:50%; width:16px; height:16px; margin-top:-8px; margin-left:-8px; border-radius:999px;
+  background:var(--bg-surface); border:1px solid var(--border-strong);
+  box-shadow:0 1px 2px rgb(0 0 0 / .04), 0 4px 12px rgb(0 0 0 / .04); transition:width var(--fast),height var(--fast)}
+.sl[data-drag="1"] .thumb{width:18px; height:18px; margin-top:-9px; margin-left:-9px}
+.sl .foot{margin-top:8px; font-family:var(--font-mono); font-size:12px; font-variant-numeric:tabular-nums; color:var(--text-secondary)}
+.sl .track:focus-visible{box-shadow:0 0 0 3px var(--ring)}
+
+/* matrix */
+.mtx{width:100%; border-collapse:collapse; table-layout:fixed}
+.mtx th,.mtx td{font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:11px; text-align:center;
+  padding:0; height:34px; border:1px solid var(--border)}
+.mtx th{color:var(--text-eyebrow); font-weight:500; height:26px; border:0}
+.mtx td.dim{opacity:.32}
+.mtx td .bd{font-size:9px; letter-spacing:.04em; display:block; opacity:.75}
+
+/* table */
+.tbl{width:100%; border-collapse:collapse}
+.tbl th{text-align:left; font-size:11px; font-weight:500; letter-spacing:.07em; text-transform:uppercase;
+  color:var(--text-eyebrow); padding:0 8px 8px 0}
+.tbl td{height:40px; border-top:1px solid var(--border); padding:0 8px 0 0; font-size:13px}
+.tbl td.m{font-family:var(--font-mono); font-variant-numeric:tabular-nums; font-size:12px}
+.tbl .sw{width:16px; height:16px; border-radius:4px; border:1px solid var(--border)}
+
+/* banner */
+.ban{display:flex; gap:8px; padding:12px 16px; border-radius:8px; align-items:flex-start; margin-top:8px}
+.ban .t{font-size:13px; font-weight:500}
+.ban .b{font-size:13px; color:var(--text-secondary)}
+.ban.err{background:var(--e50); border:1px solid var(--e100)} .ban.err svg{color:var(--e700)}
+.ban.warn{background:var(--w50); border:1px solid var(--w100)} .ban.warn svg{color:var(--w700)}
+.ban.ok{background:var(--s50); border:1px solid var(--s100)} .ban.ok svg{color:var(--s700)}
+.ban.info{background:var(--bg-subtle); border:1px solid var(--border)} .ban.info svg{color:var(--text-secondary)}
+
+/* code block */
+.code{background:var(--bg-surface); border:1px solid var(--border); border-radius:12px; overflow:hidden}
+.code .ch{height:36px; background:var(--bg-subtle); display:flex; align-items:center; justify-content:space-between;
+  padding:0 8px; gap:8px; border-bottom:1px solid var(--border); overflow-x:auto}
+.code pre{margin:0; padding:16px; font-family:var(--font-mono); font-size:13px; line-height:1.6;
+  overflow:auto; max-height:420px; white-space:pre; tab-size:2}
+.code pre .kw{color:var(--a700)} .code pre .st{color:var(--s700)} .code pre .cm{color:var(--text-muted)}
+:root.dark .code pre .kw{color:#9dc0f7}
+
+/* preview */
+.pv{border:1px solid var(--border); border-radius:12px; padding:20px; display:grid; gap:16px}
+.pv .pvcard{border-radius:10px; padding:16px; border:1px solid}
+.pv .pill{display:inline-flex; align-items:center; height:22px; padding:0 8px; border-radius:999px; font-size:12px; font-weight:500}
+.pv .pbtn{height:32px; padding:0 14px; border-radius:8px; font-size:13px; font-weight:500; border:1px solid transparent}
+.pv .ptbl{width:100%; border-collapse:collapse; font-size:13px}
+.pv .ptbl th{text-align:left; font-size:11px; letter-spacing:.07em; text-transform:uppercase; font-weight:500; padding:0 8px 6px 0}
+.pv .ptbl td{height:36px; padding:0 8px 0 0; border-top:1px solid}
+.pv .chart{display:flex; align-items:flex-end; gap:14px; height:120px; padding-top:8px}
+.pv .grp{display:flex; align-items:flex-end; gap:3px; flex:1; height:100%}
+.pv .bar{flex:1; border-radius:3px 3px 0 0}
+.pv .fld{display:grid; gap:6px}
+.pv .inp{height:32px; border-radius:8px; border:1px solid; padding:0 10px; font-size:13px; display:flex; align-items:center}
+.pv .toast{border-radius:10px; padding:10px 14px; font-size:13px; display:flex; gap:8px; align-items:center; box-shadow:var(--shadow)}
+
+.swgrid{display:grid; grid-template-columns:repeat(6,1fr); gap:8px}
+.swgrid button{height:64px; border-radius:8px; border:1px solid var(--border); position:relative; overflow:hidden}
+.swgrid button span{position:absolute; left:0; right:0; bottom:0; padding:3px 4px; font-family:var(--font-mono);
+  font-size:11px; background:rgb(255 255 255 / .82); color:#1b1b1b}
+
+.toastwrap{position:fixed; right:16px; bottom:16px; z-index:60; display:grid; gap:8px}
+.toastwrap .t{background:var(--bg-surface); border:1px solid var(--border); border-radius:10px; box-shadow:var(--shadow);
+  padding:10px 14px; font-size:13px; animation:up var(--slow) both}
+@keyframes up{from{opacity:0; transform:translateY(8px)} to{opacity:1; transform:none}}
+.sr{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0 0 0 0); white-space:nowrap}
+.dis summary{cursor:pointer; list-style:none; display:flex; align-items:center; gap:6px; font-size:13px; font-weight:500; color:var(--text-secondary)}
+.dis summary::-webkit-details-marker{display:none}
+.dis summary:hover{color:var(--text-primary)}
+.dis[open] summary{margin-bottom:16px}
+.dis .mk{transition:transform var(--med)}
+.dis[open] .mk{transform:rotate(90deg)}
+.grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px}
+.hamb{display:none}
+
+@media (max-width:1279px){
+  .app{grid-template-columns:256px minmax(0,1fr)}
+  .insp{position:fixed; left:0; right:0; bottom:0; top:auto; height:auto; max-height:52vh; z-index:50;
+    background:var(--bg-panel); border-top:1px solid var(--border); border-left:0; box-shadow:var(--shadow); padding:12px 16px 20px}
+  .insp[data-open="0"]{max-height:44px; overflow:hidden}
+  main{padding-bottom:calc(52vh + 32px)}
+}
+@media (max-width:899px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:fixed; top:56px; left:0; bottom:0; width:272px; z-index:45; height:auto; transform:translateX(-100%);
+    transition:transform var(--med)}
+  .side[data-open="1"]{transform:none}
+  .hamb{display:grid}
+  main{padding:32px 16px 120px}
+  .strip{grid-template-columns:repeat(6,1fr)}
+  .grid2{grid-template-columns:1fr}
+}
+@media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <filter id="cvd" color-interpolation-filters="linearRGB"><feColorMatrix id="cvdm" type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"/></filter>
+</defs></svg>
+
+<header class="hdr">
+  <button class="iconbtn hamb" id="hamb" aria-label="Toggle sidebar">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 4h12M2 8h12M2 12h12"/></svg>
+  </button>
+  <div class="crumb"><span>Systems</span><span>/</span><b id="crumb">Untitled system</b></div>
+  <div class="grow"></div>
+  <div class="row" style="gap:2px">
+    <button class="iconbtn" id="btnCvd" aria-label="Color vision simulation" title="Color vision simulation">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M1 8s2.6-4.4 7-4.4S15 8 15 8s-2.6 4.4-7 4.4S1 8 1 8Z"/><circle cx="8" cy="8" r="2"/></svg>
+    </button>
+    <button class="iconbtn" id="btnTheme" aria-label="Toggle dark mode" title="Toggle dark mode">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="3.2"/><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M12.8 3.2l-1.1 1.1M4.3 11.7l-1.1 1.1"/></svg>
+    </button>
+    <button class="iconbtn" id="btnShare" aria-label="Copy share link" title="Copy share link">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="3.5" r="2"/><circle cx="4" cy="8" r="2"/><circle cx="12" cy="12.5" r="2"/><path d="M10.2 4.5 5.8 6.9M5.8 9.1l4.4 2.4"/></svg>
+    </button>
+    <button class="iconbtn" id="btnExport" aria-label="Go to export" title="Export">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8m0 0 3-3m-3 3L5 7M2.5 12.5h11"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="app" id="app">
+  <aside class="side" id="side" data-open="0">
+    <div class="eyebrow" style="padding:0 4px 8px">Brand color</div>
+    <div class="brandfield">
+      <span class="sw" id="bsw"></span>
+      <input id="binput" class="mono" type="text" value="#5b93eb" spellcheck="false" aria-label="Brand color value">
+      <span class="ms mut mono" id="bfmt">hex</span>
+    </div>
+    <div class="row" style="margin-top:8px; gap:6px">
+      <button class="btn sec" id="btnPick" style="display:none; flex:1">Pick from screen</button>
+      <button class="btn sec" id="btnImg" style="flex:1">From image</button>
+      <input type="file" id="fileImg" accept="image/*" class="sr">
+    </div>
+    <div id="imgOut" class="swgrid" style="margin-top:8px; display:none"></div>
+
+    <div class="navgrp">
+      <div class="eyebrow">Family signature</div>
+      <div class="sigread" id="sigread"></div>
+      <button class="btn ghost" id="btnSig" style="margin-top:8px; width:100%; justify-content:flex-start">Edit signature</button>
+    </div>
+
+    <div class="navgrp">
+      <div class="eyebrow">Ramps</div>
+      <div class="navtree" id="navtree"></div>
+    </div>
+
+    <div class="navgrp">
+      <div class="eyebrow">Saved systems</div>
+      <div id="saved" style="margin-top:8px"></div>
+      <div class="row" style="margin-top:8px; gap:6px">
+        <button class="btn sec" id="btnSave" style="flex:1">Save current</button>
+        <button class="btn ghost" id="btnReset">Reset</button>
+      </div>
+    </div>
+  </aside>
+
+  <main>
+    <div class="col">
+      <h1>Color system</h1>
+      <p class="sm sec" style="margin-top:8px; max-width:68ch">One brand color, read as a structural signature, reissued across every semantic hue. Intensity is held as a share of each hue's gamut ceiling, so the family stays consistent where absolute chroma cannot.</p>
+
+      <section class="blk" id="s-signature" style="margin-top:40px">
+        <h2>Family signature</h2>
+        <p class="sm sec">Five properties extracted from the brand color. Every ramp in the system inherits them.</p>
+        <div class="card">
+          <h3>Extracted</h3>
+          <p class="sm sec">Override any value; the ramps below follow immediately.</p>
+          <div class="body grid2" id="sigSliders"></div>
+          <hr>
+          <div class="row" style="gap:8px; flex-wrap:wrap">
+            <div class="chip" id="chipIn">input —</div>
+            <div class="chip" id="chipPeak">peak L —</div>
+            <div class="chip" id="chipInt">intensity —</div>
+            <button class="btn ghost" id="btnSigReset">Reset to extracted</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="blk" id="s-brand">
+        <h2>Brand ramp</h2>
+        <p class="sm sec">Eleven stops on the shared lightness ladder. Lock a stop to hold it verbatim through regeneration; its neighbours re-smooth around it.</p>
+        <div class="rampmeta"><span class="eyebrow" id="brandMeta">hue —</span></div>
+        <div class="vramp" id="brandRamp"></div>
+        <div id="brandNotes"></div>
+      </section>
+
+      <section class="blk" id="s-semantic">
+        <h2>Semantic system</h2>
+        <p class="sm sec">Each role sits at its own anchor hue, pulled toward the brand only when the two are within 90°. A hue roughly opposite the brand is left alone — dragging it would produce a color that is neither harmonious nor recognisable as its role.</p>
+        <div id="semRamps"></div>
+        <div id="semNotes" style="margin-top:16px"></div>
+        <details class="dis sub" id="disTune">
+          <summary><svg class="mk" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2.5 8 6l-4 3.5"/></svg>Semantic tuning</summary>
+          <div class="card"><div class="grid2" id="tuneSliders"></div>
+            <hr><div id="tunePrev" class="row" style="gap:16px; flex-wrap:wrap"></div>
+          </div>
+        </details>
+      </section>
+
+      <section class="blk" id="s-neutral">
+        <h2>Neutrals</h2>
+        <p class="sm sec">A tinted neutral is what makes an interface feel designed rather than assembled. The warm and cool pair sit ±40° off the brand hue, for surfaces that need to read apart from it.</p>
+        <div class="row" style="gap:12px; flex-wrap:wrap">
+          <div class="seg" id="segNeutral" role="group" aria-label="Neutral mode">
+            <button data-v="pure">Pure</button><button data-v="tinted">Tinted</button>
+          </div>
+          <div style="flex:1; min-width:220px" id="neutralTint"></div>
+        </div>
+        <div id="neuRamps" style="margin-top:16px"></div>
+      </section>
+
+      <section class="blk" id="s-accent">
+        <h2>Accents</h2>
+        <p class="sm sec">Non-semantic hues placed in OKLCH hue space, all inheriting the family signature.</p>
+        <div class="row" style="gap:12px; flex-wrap:wrap">
+          <div class="seg" id="segScheme" role="group" aria-label="Accent scheme">
+            <button data-v="analogous">Analogous</button><button data-v="split">Split-complement</button>
+            <button data-v="triad">Triad</button><button data-v="tetrad">Tetrad</button><button data-v="sweep">Wide sweep</button>
+          </div>
+          <div style="flex:1; min-width:200px" id="sweepN"></div>
+        </div>
+        <div id="accRamps" style="margin-top:16px"></div>
+        <div id="accNotes"></div>
+      </section>
+
+      <section class="blk" id="s-dark">
+        <h2>Light and dark</h2>
+        <p class="sm sec">The dark set is generated, not inverted: the ladder is remapped so the darkest stops become surfaces, chroma comes down at high lightness where saturated light text vibrates, and the neutral tint leans further toward the brand.</p>
+        <div class="grid2" id="ldPair"></div>
+      </section>
+
+      <section class="blk" id="s-preview">
+        <h2>Live preview</h2>
+        <p class="sm sec">Where the system is actually judged.</p>
+        <div class="row" style="gap:8px">
+          <div class="seg" id="segPvTheme" role="group" aria-label="Preview theme"><button data-v="light">Light</button><button data-v="dark">Dark</button></div>
+        </div>
+        <div id="preview" style="margin-top:16px"></div>
+      </section>
+
+      <section class="blk" id="s-a11y">
+        <h2>Accessibility</h2>
+        <p class="sm sec">WCAG 2.1 ratios and APCA lightness contrast side by side — WCAG misjudges light text, so both are shown and labelled.</p>
+        <div class="row" style="gap:12px; flex-wrap:wrap">
+          <div class="seg" id="segMtx" role="group" aria-label="Contrast metric"><button data-v="wcag">WCAG</button><button data-v="apca">APCA Lc</button></div>
+          <select id="mtxRamp" style="width:auto; min-width:160px" aria-label="Ramp for contrast matrix"></select>
+        </div>
+        <div style="margin-top:16px; overflow-x:auto"><table class="mtx" id="mtx"></table></div>
+        <p class="cap mut" style="margin-top:8px">Rows are background, columns are foreground. Cells below 3:1 are dimmed.</p>
+        <div class="sub">
+          <h3>Color vision simulation</h3>
+          <p class="sm sec" style="margin-top:4px">Applied to the whole interface, including this page's chrome, via the Viénot–Brettel–Mollon transform in linear RGB.</p>
+          <div class="seg" style="margin-top:12px" id="segCvd" role="group" aria-label="Color vision simulation">
+            <button data-v="none">None</button><button data-v="prot">Protanopia</button><button data-v="deut">Deuteranopia</button>
+            <button data-v="trit">Tritanopia</button><button data-v="achr">Achromatopsia</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="blk" id="s-analyze">
+        <h2>Analyze an existing palette</h2>
+        <p class="sm sec">Paste hex values to read their structure, then harmonize them onto one signature while keeping each hue's identity.</p>
+        <textarea id="anIn" rows="3" class="mono" spellcheck="false" placeholder="#2c80f6, #ca252d, #21863c, #93661c"></textarea>
+        <div class="row" style="margin-top:8px; gap:8px">
+          <button class="btn sec" id="btnAn">Analyze</button>
+          <button class="btn sec" id="btnHarm">Harmonize</button>
+        </div>
+        <div id="anOut" style="margin-top:16px"></div>
+      </section>
+
+      <section class="blk" id="s-export">
+        <h2>Export</h2>
+        <p class="sm sec">Every format is generated from the current state. The share link encodes the whole system in the URL.</p>
+        <div class="code">
+          <div class="ch">
+            <div class="seg" id="segFmt" role="group" aria-label="Export format">
+              <button data-v="css">CSS</button><button data-v="tw">Tailwind v4</button><button data-v="scss">SCSS</button>
+              <button data-v="json">JSON</button><button data-v="jsonn">JSON nested</button><button data-v="dtcg">DTCG</button><button data-v="svg">SVG sheet</button>
+            </div>
+            <button class="iconbtn" id="btnCopyCode" aria-label="Copy export">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="8" height="8" rx="2"/><path d="M10.5 3.5A2 2 0 0 0 8.5 2h-4a2 2 0 0 0-2 2v5c0 .8.5 1.5 1.2 1.8"/></svg>
+            </button>
+          </div>
+          <pre id="codeOut"><code></code></pre>
+        </div>
+        <div class="row" style="margin-top:12px; gap:8px; flex-wrap:wrap">
+          <button class="btn sec" id="btnP3">Include P3 upgrade block</button>
+          <button class="btn sec" id="btnShare2">Copy share link</button>
+        </div>
+      </section>
+
+      <p class="cap mut mono" id="mathTest" style="margin-top:-24px"></p>
+    </div>
+  </main>
+
+  <aside class="insp" id="insp" data-open="1">
+    <div class="between" style="margin-bottom:8px">
+      <div class="eyebrow">Inspector</div>
+      <button class="iconbtn" id="inspToggle" aria-label="Collapse inspector" style="display:none">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 6l4 4 4-4"/></svg>
+      </button>
+    </div>
+    <div id="inspBody"></div>
+  </aside>
+</div>
+
+<div class="toastwrap" id="toasts"></div>
+<div class="sr" role="status" aria-live="polite" id="live"></div>
+
+<script>
+/* ========================= 1. color math (verbatim core) ========================= */
+const lin = (c) => { c /= 255; return c <= 0.04045 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4); };
+const gam = (c) => c <= 0.0031308 ? c * 12.92 : 1.055 * Math.pow(c, 1 / 2.4) - 0.055;
+
+function hexToOklch(hex) {
+  const h = hex.replace('#', '');
+  const r = lin(parseInt(h.slice(0, 2), 16)),
+        g = lin(parseInt(h.slice(2, 4), 16)),
+        b = lin(parseInt(h.slice(4, 6), 16));
+  const l = 0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b;
+  const m = 0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b;
+  const s = 0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b;
+  const l_ = Math.cbrt(l), m_ = Math.cbrt(m), s_ = Math.cbrt(s);
+  const L = 0.2104542553 * l_ + 0.7936177850 * m_ - 0.0040720468 * s_;
+  const A = 1.9779984951 * l_ - 2.4285922050 * m_ + 0.4505937099 * s_;
+  const B = 0.0259040371 * l_ + 0.7827717662 * m_ - 0.8086757660 * s_;
+  return { L, C: Math.hypot(A, B), H: (Math.atan2(B, A) * 180 / Math.PI + 360) % 360 };
+}
+
+function oklchToLinear(L, C, H) {
+  const A = C * Math.cos(H * Math.PI / 180), B = C * Math.sin(H * Math.PI / 180);
+  const l_ = L + 0.3963377774 * A + 0.2158037573 * B;
+  const m_ = L - 0.1055613458 * A - 0.0638541728 * B;
+  const s_ = L - 0.0894841775 * A - 1.2914855480 * B;
+  const l = l_ ** 3, m = m_ ** 3, s = s_ ** 3;
+  return [ 4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+          -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+          -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s];
+}
+
+const inGamut = (L, C, H, e = 1e-4) =>
+  oklchToLinear(L, C, H).every(v => v >= -e && gam(Math.max(v, 0)) <= 1 + e);
+
+function maxChroma(L, H) {
+  let lo = 0, hi = 0.5;
+  for (let i = 0; i < 28; i++) { const m = (lo + hi) / 2; inGamut(L, m, H) ? lo = m : hi = m; }
+  return lo;
+}
+
+function oklchToHex(L, C, H) {
+  if (!inGamut(L, C, H)) C = maxChroma(L, H);
+  const t = oklchToLinear(L, C, H)
+    .map(v => Math.round(Math.min(1, Math.max(0, gam(Math.max(v, 0)))) * 255));
+  return '#' + t.map(v => v.toString(16).padStart(2, '0')).join('');
+}
+
+/* --- same style: hsl, p3, parsing --- */
+function hslToHex(h, s, l){
+  h = ((h % 360) + 360) % 360; s /= 100; l /= 100;
+  const c = (1 - Math.abs(2 * l - 1)) * s, x = c * (1 - Math.abs((h / 60) % 2 - 1)), m = l - c / 2;
+  const t = h < 60 ? [c,x,0] : h < 120 ? [x,c,0] : h < 180 ? [0,c,x] : h < 240 ? [0,x,c] : h < 300 ? [x,0,c] : [c,0,x];
+  return '#' + t.map(v => Math.round((v + m) * 255).toString(16).padStart(2,'0')).join('');
+}
+function hexToHsl(hex){
+  const h = hex.replace('#','');
+  const r = parseInt(h.slice(0,2),16)/255, g = parseInt(h.slice(2,4),16)/255, b = parseInt(h.slice(4,6),16)/255;
+  const mx = Math.max(r,g,b), mn = Math.min(r,g,b), d = mx - mn, l = (mx + mn) / 2;
+  let hh = 0;
+  if (d) { hh = mx === r ? ((g-b)/d + (g<b?6:0)) : mx === g ? (b-r)/d + 2 : (r-g)/d + 4; hh *= 60; }
+  return { h: hh, s: d ? d / (1 - Math.abs(2*l - 1)) * 100 : 0, l: l * 100 };
+}
+// OKLab -> XYZ (D65) -> linear Display-P3 -> sRGB transfer
+function oklchToP3(L, C, H){
+  const A = C * Math.cos(H * Math.PI/180), B = C * Math.sin(H * Math.PI/180);
+  const l_ = L + 0.3963377774*A + 0.2158037573*B, m_ = L - 0.1055613458*A - 0.0638541728*B, s_ = L - 0.0894841775*A - 1.2914855480*B;
+  const l = l_**3, m = m_**3, s = s_**3;
+  const X =  1.2270138511*l - 0.5577999807*m + 0.2812561490*s;
+  const Y = -0.0405801784*l + 1.1122568696*m - 0.0716766787*s;
+  const Z = -0.0763812845*l - 0.4214819784*m + 1.5861632204*s;
+  const r =  2.4934969119*X - 0.9313836179*Y - 0.4027107845*Z;
+  const g = -0.8294889696*X + 1.7626640603*Y + 0.0236246858*Z;
+  const b =  0.0358458302*X - 0.0761723893*Y + 0.9568845240*Z;
+  return [r,g,b].map(v => Math.min(1, Math.max(0, gam(Math.max(v,0)))));
+}
+const oklchToP3Hex = (L,C,H) => '#' + oklchToP3(L,C,H).map(v => Math.round(v*255).toString(16).padStart(2,'0')).join('');
+
+function parseColor(str){
+  const s = String(str).trim().toLowerCase();
+  let m;
+  if ((m = s.match(/^#([0-9a-f]{3,8})$/))) {
+    let h = m[1];
+    if (h.length === 3 || h.length === 4) h = h.slice(0,3).split('').map(c => c + c).join('');
+    if (h.length === 8) h = h.slice(0,6);
+    if (h.length !== 6) return null;
+    return { hex: '#' + h, fmt: 'hex' };
+  }
+  if ((m = s.match(/^rgba?\(([^)]+)\)$/))) {
+    const p = m[1].split(/[\s,\/]+/).filter(Boolean).map(v => v.endsWith('%') ? parseFloat(v)*2.55 : parseFloat(v));
+    if (p.length < 3 || p.some(isNaN)) return null;
+    return { hex: '#' + p.slice(0,3).map(v => Math.round(Math.min(255,Math.max(0,v))).toString(16).padStart(2,'0')).join(''), fmt: 'rgb' };
+  }
+  if ((m = s.match(/^hsla?\(([^)]+)\)$/))) {
+    const p = m[1].split(/[\s,\/]+/).filter(Boolean).map(parseFloat);
+    if (p.length < 3 || p.some(isNaN)) return null;
+    return { hex: hslToHex(p[0], p[1], p[2]), fmt: 'hsl' };
+  }
+  if ((m = s.match(/^oklch\(([^)]+)\)$/))) {
+    const p = m[1].split(/[\s,\/]+/).filter(Boolean);
+    let L = parseFloat(p[0]); if (p[0].endsWith('%')) L /= 100;
+    const C = parseFloat(p[1]), H = parseFloat(p[2]) || 0;
+    if ([L,C].some(isNaN)) return null;
+    return { hex: oklchToHex(L, C, H), fmt: 'oklch' };
+  }
+  if (/^[a-z]+$/.test(s)) { // CSS named colors, resolved without a lookup table
+    const c = document.createElement('canvas').getContext('2d');
+    c.fillStyle = '#000'; c.fillStyle = s;
+    const r = c.fillStyle;
+    if (r !== '#000000' || s === 'black') return { hex: r.length === 7 ? r : '#000000', fmt: 'named' };
+  }
+  return null;
+}
+
+/* ========================= 2. derived constants ========================= */
+const satPct  = (L, C, H) => { const mc = maxChroma(L, H); return mc > 1e-6 ? C / mc : 0; };
+const chromaAt = (L, H, pct) => pct * maxChroma(L, H);
+
+const PEAK_L = {0:0.65, 15:0.63, 30:0.63, 45:0.70, 60:0.75, 75:0.80, 90:0.86,
+                105:0.93, 120:0.94, 135:0.89, 150:0.87, 165:0.88, 180:0.89,
+                195:0.90, 210:0.84, 225:0.78, 240:0.72, 255:0.62, 270:0.46,
+                285:0.50, 300:0.55, 315:0.62, 330:0.69, 345:0.66};
+function peakL(H){
+  const h = ((H % 360) + 360) % 360, i = Math.floor(h / 15) * 15, t = (h - i) / 15;
+  const a = PEAK_L[i], b = PEAK_L[(i + 15) % 360];
+  return a + (b - a) * t;
+}
+
+const LADDER = [0.97,0.93,0.88,0.81,0.73,0.65,0.57,0.49,0.41,0.33,0.25];
+const STEPS  = [50,100,200,300,400,500,600,700,800,900,950];
+const ENV    = [0.22,0.42,0.62,0.82,0.95,1.00,0.98,0.92,0.82,0.68,0.52];
+const DARK_LADDER = [0.19,0.23,0.28,0.34,0.41,0.49,0.57,0.66,0.74,0.83,0.91];
+
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+const norm360 = h => ((h % 360) + 360) % 360;
+const angDiff = (a,b) => { let d = norm360(a - b); return d > 180 ? d - 360 : d; };
+const interpArr = (arr, x) => {
+  const i = clamp(Math.floor(x), 0, arr.length - 1), j = clamp(i + 1, 0, arr.length - 1), t = clamp(x - i, 0, 1);
+  return arr[i] + (arr[j] - arr[i]) * t;
+};
+// ladder position for an arbitrary L, so light and dark ramps share one envelope
+function ladderIndex(L){
+  if (L >= LADDER[0]) return 0;
+  if (L <= LADDER[10]) return 10;
+  for (let i = 0; i < 10; i++) if (L <= LADDER[i] && L >= LADDER[i+1])
+    return i + (LADDER[i] - L) / (LADDER[i] - LADDER[i+1]);
+  return 5;
+}
+
+/* ========================= 3. contrast, APCA, ΔEOK, CVD ========================= */
+const relLum = hex => { const h = hex.replace('#',''); const [r,g,b] = [0,2,4].map(i => lin(parseInt(h.slice(i,i+2),16)));
+  return 0.2126*r + 0.7152*g + 0.0722*b; };
+const contrast = (a,b) => { const x = relLum(a), y = relLum(b); return (Math.max(x,y) + 0.05) / (Math.min(x,y) + 0.05); };
+function apcaY(hex){ const h = hex.replace('#','');
+  const c = [0,2,4].map(i => Math.pow(parseInt(h.slice(i,i+2),16)/255, 2.4));
+  let y = 0.2126729*c[0] + 0.7151522*c[1] + 0.0721750*c[2];
+  return y < 0.022 ? y + Math.pow(0.022 - y, 1.414) : y; }
+function apca(txt, bg){
+  const yt = apcaY(txt), yb = apcaY(bg);
+  if (Math.abs(yb - yt) < 0.0005) return 0;
+  let out;
+  if (yb > yt) { const s = (Math.pow(yb,0.56) - Math.pow(yt,0.57)) * 1.14; out = s < 0.1 ? 0 : (s - 0.027) * 100; }
+  else { const s = (Math.pow(yb,0.65) - Math.pow(yt,0.62)) * 1.14; out = s > -0.1 ? 0 : (s + 0.027) * 100; }
+  return out;
+}
+function oklab(hex){ const {L,C,H} = hexToOklch(hex); const r = H*Math.PI/180; return [L, C*Math.cos(r), C*Math.sin(r)]; }
+const dEOK = (a,b) => { const x = oklab(a), y = oklab(b); return Math.hypot(x[0]-y[0], x[1]-y[1], x[2]-y[2]); };
+
+// Viénot–Brettel–Mollon, applied in linear RGB
+const RGB2LMS = [[17.8824,43.5161,4.11935],[3.45565,27.1554,3.86714],[0.0299566,0.184309,1.46709]];
+const LMS2RGB = [[0.080944,-0.130504,0.116721],[-0.0102485,0.0540194,-0.113615],[-0.000365294,-0.00412163,0.693513]];
+const CVD_LMS = {
+  prot: [[0,2.02344,-2.52581],[0,1,0],[0,0,1]],
+  deut: [[1,0,0],[0.494207,0,1.24827],[0,0,1]],
+  trit: [[1,0,0],[0,1,0],[-0.395913,0.801109,0]]
+};
+const mul = (A,B) => A.map(r => B[0].map((_,j) => r.reduce((s,v,k) => s + v*B[k][j], 0)));
+function cvdMatrix(kind){
+  if (kind === 'achr') return [[0.2126,0.7152,0.0722],[0.2126,0.7152,0.0722],[0.2126,0.7152,0.0722]];
+  if (!CVD_LMS[kind]) return [[1,0,0],[0,1,0],[0,0,1]];
+  return mul(LMS2RGB, mul(CVD_LMS[kind], RGB2LMS));
+}
+function simulate(hex, kind){
+  if (kind === 'none' || !kind) return hex;
+  const M = cvdMatrix(kind), h = hex.replace('#','');
+  const v = [0,2,4].map(i => lin(parseInt(h.slice(i,i+2),16)));
+  return '#' + M.map(r => {
+    const x = r[0]*v[0] + r[1]*v[1] + r[2]*v[2];
+    return Math.round(clamp(gam(clamp(x,0,1)),0,1)*255).toString(16).padStart(2,'0');
+  }).join('');
+}
+
+/* ========================= 4. state ========================= */
+const KEY = 'csg.state.v1';
+const DEF = {
+  brand:'#5b93eb',
+  intensity:null, lift:null, liftScale:0.6,
+  envPeak:0, envSteep:1,
+  blueHi:8, blueLo:-4, blueOn:true,
+  pull:0.25, anchors:{error:25, warning:75, success:148, info:245},
+  neutralMode:'tinted', tint:4,
+  scheme:'analogous', sweepN:5,
+  locks:{}, sel:{ramp:'brand', step:500},
+  theme:null, cvd:'none', pvTheme:'light', fmt:'css', mtxMetric:'wcag', mtxRamp:'brand', p3:false
+};
+let S = JSON.parse(JSON.stringify(DEF));
+const WINDOW = { error:14, warning:12, success:14, info:18 };
+
+function loadState(){
+  try {
+    if (location.hash.length > 2) {
+      const j = JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(1).replace(/-/g,'+').replace(/_/g,'/')))));
+      S = Object.assign(JSON.parse(JSON.stringify(DEF)), j); return;
+    }
+  } catch(e){}
+  try { const j = JSON.parse(localStorage.getItem(KEY) || 'null'); if (j) S = Object.assign(JSON.parse(JSON.stringify(DEF)), j); } catch(e){}
+}
+let persistT;
+function persist(){ clearTimeout(persistT); persistT = setTimeout(() => {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){} }, 400); }
+const encodeState = () => btoa(unescape(encodeURIComponent(JSON.stringify(S)))).replace(/\+/g,'-').replace(/\//g,'_');
+
+/* ========================= 5. engine ========================= */
+function envelopeAt(L){
+  const idx = ladderIndex(L) - S.envPeak;
+  return Math.pow(clamp(interpArr(ENV, idx), 0.01, 1), S.envSteep);
+}
+function hueDrift(baseH, L){
+  if (!S.blueOn) return 0;
+  const h = norm360(baseH);
+  if (h < 250 || h > 300) return 0;
+  const i = ladderIndex(L);
+  return i <= 5 ? S.blueHi * (1 - i/5) : S.blueLo * ((i - 5)/5);
+}
+function makeRamp(id, baseH, opts){
+  opts = opts || {};
+  const dark = !!opts.dark, ladder = dark ? DARK_LADDER : LADDER;
+  const intensity = opts.intensity != null ? opts.intensity : MODEL.intensity;
+  const stops = [];
+  for (let i = 0; i < 11; i++){
+    let L = ladder[i];
+    const lockHex = S.locks[id + ':' + STEPS[i]];
+    if (lockHex){
+      const o = hexToOklch(lockHex);
+      stops.push({ step:STEPS[i], L:o.L, C:o.C, H:o.H, hex:lockHex, locked:true });
+      continue;
+    }
+    let H = norm360(baseH + hueDrift(baseH, L));
+    let mult = envelopeAt(L);
+    if (dark) mult *= 1 - 0.25 * clamp((L - 0.55) / 0.35, 0, 1);
+    let C = clamp(intensity * mult * maxChroma(L, H), 0, maxChroma(L, H));
+    if (opts.pureNeutral) C = 0;
+    if (opts.tintPct != null) C = (opts.tintPct/100) * maxChroma(L, H);
+    stops.push({ step:STEPS[i], L, C, H, hex:oklchToHex(L, C, H), locked:false });
+  }
+  // neighbours re-smooth around a locked stop
+  for (let i = 0; i < 11; i++){
+    if (!stops[i].locked) continue;
+    [i-1, i+1].forEach(j => {
+      if (j < 0 || j > 10 || stops[j].locked) return;
+      const far = stops[clamp(j + (j - i), 0, 10)];
+      const L = (stops[j].L + (stops[i].L + far.L)/2) / 2;
+      const H = stops[j].H, C = clamp(stops[j].C, 0, maxChroma(L, H));
+      stops[j] = { step:STEPS[j], L, C, H, hex:oklchToHex(L, C, H), locked:false };
+    });
+  }
+  return { id, baseH, stops, dark };
+}
+const at = (ramp, step) => ramp.stops[STEPS.indexOf(step)];
+
+function deriveSemantics(brand, intensity, lift, notes){
+  const order = ['error','warning','success','info'], out = {}, widen = {};
+  const build = (r) => {
+    const anchor = S.anchors[r], win = WINDOW[r] + (widen[r] || 0);
+    const delta = angDiff(brand.H, anchor);
+    const pull = Math.abs(delta) > 90 ? 0 : S.pull;
+    const H = norm360(anchor + clamp(pull * delta, -win, win));
+    const L = clamp(peakL(H) + S.liftScale * lift, 0.45, 0.85);
+    return { H, L, C: intensity * maxChroma(L, H), anchor, pulled: Math.abs(pull * delta) > 0.05 };
+  };
+  order.forEach(r => out[r] = build(r));
+
+  // mutual distinctness — ΔEOK ≥ 0.10
+  for (let i = 1; i < order.length; i++){
+    const r = order[i];
+    for (let k = 0; k < i; k++){
+      const q = order[k];
+      let guard = 0;
+      while (dEOK(oklchToHex(out[r].L,out[r].C,out[r].H), oklchToHex(out[q].L,out[q].C,out[q].H)) < 0.10 && guard < 12){
+        widen[r] = (widen[r] || 0) + 3;
+        const dir = angDiff(out[r].H, out[q].H) >= 0 ? 1 : -1;
+        out[r].H = norm360(out[r].H + dir * 3);
+        out[r].L = clamp(peakL(out[r].H) + S.liftScale * lift, 0.45, 0.85);
+        out[r].C = intensity * maxChroma(out[r].L, out[r].H);
+        guard++;
+      }
+      if (guard) notes.push({ kind:'info', t:'Two semantic roles were too close',
+        b: r + ' sat within ΔEOK 0.10 of ' + q + ' — ' + r + ' was rotated ' + (guard*3) + '° to separate them.' });
+    }
+  }
+  // CVD survival — error vs success under deuteranopia
+  let moved = 0;
+  const hexOf = r => oklchToHex(out[r].L, out[r].C, out[r].H);
+  while (dEOK(simulate(hexOf('error'),'deut'), simulate(hexOf('success'),'deut')) < 0.10 && moved < 14){
+    out.error.L = clamp(out.error.L - 0.01, 0.30, 0.9);
+    out.success.L = clamp(out.success.L + 0.01, 0.30, 0.9);
+    moved++;
+    if (Math.abs(out.error.L - out.success.L) >= 0.12 &&
+        dEOK(simulate(hexOf('error'),'deut'), simulate(hexOf('success'),'deut')) >= 0.10) break;
+  }
+  if (moved){
+    ['error','success'].forEach(r => out[r].C = S_intensity() * maxChroma(out[r].L, out[r].H));
+    notes.push({ kind:'warn', t:'Error and success collided under deuteranopia',
+      b: 'Error was darkened by ' + (moved/100).toFixed(2) + ' L and success lightened by the same, to hold them ' +
+         Math.abs(out.error.L - out.success.L).toFixed(2) + ' L apart.' });
+  }
+  return out;
+}
+const S_intensity = () => MODEL ? MODEL.intensity : 0.9;
+
+let MODEL = null;
+function build(){
+  const p = parseColor(S.brand) || { hex:'#5b93eb', fmt:'hex' };
+  const brand = hexToOklch(p.hex);
+  const notes = [];
+  const intensity = S.intensity != null ? S.intensity : satPct(brand.L, brand.C, brand.H);
+  const lift = S.lift != null ? S.lift : brand.L - peakL(brand.H);
+  MODEL = { brandHex:p.hex, fmt:p.fmt, brand, intensity, lift, notes, ramps:{}, dark:{}, sem:{} };
+
+  MODEL.ramps.brand = makeRamp('brand', brand.H);
+  const sem = deriveSemantics(brand, intensity, lift, notes);
+  MODEL.sem = sem;
+  const fixes = [];
+  ['error','warning','success','info'].forEach(r => {
+    MODEL.ramps[r] = makeRamp(r, sem[r].H);
+    // role legibility: 600 vs 50 ≥ 4.5:1
+    const idx = STEPS.indexOf(600), s50 = MODEL.ramps[r].stops[0];
+    let st = MODEL.ramps[r].stops[idx], walked = 0;
+    while (contrast(st.hex, s50.hex) < 4.5 && walked < 30 && !st.locked){
+      const L = st.L - 0.01, H = st.H, C = clamp(st.C, 0, maxChroma(L, H));
+      st = { step:600, L, C, H, hex:oklchToHex(L,C,H), locked:false }; walked++;
+    }
+    if (walked){ MODEL.ramps[r].stops[idx] = st;
+      fixes.push(r + ' by ' + fx(walked/100,2) + ' L to ' + fx(contrast(st.hex, s50.hex),2) + ':1'); }
+  });
+  if (fixes.length) notes.push({ kind:'info', t:'Contrast corrected at the 600 stop',
+    b:'These roles missed 4.5:1 against their own 50, so lightness walked down until they cleared it — ' + fixes.join(', ') + '.' });
+
+  const tint = S.neutralMode === 'pure' ? null : S.tint;
+  MODEL.ramps.neutral = makeRamp('neutral', brand.H, S.neutralMode === 'pure' ? {pureNeutral:true} : {tintPct:tint});
+  MODEL.ramps.warm = makeRamp('warm', norm360(brand.H + 40), {tintPct: tint == null ? 3 : tint});
+  MODEL.ramps.cool = makeRamp('cool', norm360(brand.H - 40), {tintPct: tint == null ? 3 : tint});
+
+  const offs = { analogous:[-30,30], split:[-150,150], triad:[-120,120], tetrad:[90,180,270] }[S.scheme]
+    || Array.from({length:S.sweepN}, (_,i) => (i+1) * (360/(S.sweepN+1)));
+  MODEL.accents = offs.map((o,i) => {
+    const H = norm360(brand.H + o);
+    const r = makeRamp('accent' + (i+1), H);
+    r.trough = H >= 185 && H <= 215;
+    r.offset = o;
+    return r;
+  });
+
+  ['brand','error','warning','success','info'].forEach(k =>
+    MODEL.dark[k] = makeRamp(k + '-dark', MODEL.ramps[k].baseH, {dark:true}));
+  MODEL.dark.neutral = makeRamp('neutral-dark', brand.H, {dark:true, tintPct: tint == null ? 0 : tint * 1.5});
+  return MODEL;
+}
+const allRamps = () => {
+  const o = { brand:MODEL.ramps.brand, error:MODEL.ramps.error, warning:MODEL.ramps.warning,
+              success:MODEL.ramps.success, info:MODEL.ramps.info, neutral:MODEL.ramps.neutral,
+              warm:MODEL.ramps.warm, cool:MODEL.ramps.cool };
+  MODEL.accents.forEach((r,i) => o['accent' + (i+1)] = r);
+  return o;
+};
+const textOn = (hex, ramp) => contrast(hex, '#ffffff') >= contrast(hex, at(ramp,900).hex) ? '#ffffff' : at(ramp,900).hex;
+
+/* ========================= 6. DOM helpers ========================= */
+const $ = s => document.querySelector(s);
+function el(tag, attrs, kids){
+  const n = document.createElement(tag);
+  for (const k in (attrs||{})){
+    const v = attrs[k];
+    if (k === 'style') n.setAttribute('style', v);
+    else if (k === 'text') n.textContent = v;
+    else if (k === 'html') n.innerHTML = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else if (v != null) n.setAttribute(k, v);
+  }
+  (kids||[]).forEach(c => c && n.appendChild(c));
+  return n;
+}
+const fx = (v,d) => Number(v).toFixed(d);
+function toast(msg){
+  const t = el('div',{class:'t',text:msg});
+  $('#toasts').appendChild(t);
+  $('#live').textContent = msg;
+  setTimeout(() => t.remove(), 3000);
+}
+function copy(text, label){
+  navigator.clipboard?.writeText(text).then(() => toast((label||'Copied') + ' to clipboard'),
+    () => toast('Copy blocked by the browser')).catch(()=>{});
+}
+const ICON = {
+  lock:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5.2a2.5 2.5 0 0 1 5 0V7"/></svg>',
+  unlock:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".7"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5.2a2.5 2.5 0 0 1 4.6-1.3"/></svg>',
+  copy:'<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="8" height="8" rx="2"/><path d="M10.5 3.5A2 2 0 0 0 8.5 2h-4a2 2 0 0 0-2 2v5c0 .8.5 1.5 1.2 1.8"/></svg>',
+  info:'<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 7.2v4M8 5.2v.6"/></svg>'
+};
+
+/* ========================= 7. sliders ========================= */
+function slider(cfg){
+  // cfg: {label, min, max, unit, step, dec, get, set, domainMax, reach, grad}
+  const wrap = el('div',{class:'sl'});
+  const num = el('input',{type:'text', class:'mono', 'aria-label':cfg.label});
+  const top = el('div',{class:'top'},[el('label',{text:cfg.label}), num]);
+  const reachTrack = el('div',{class:'track reach', tabindex:'0', role:'slider'});
+  const thumb = el('div',{class:'thumb'});
+  reachTrack.appendChild(thumb);
+  const stub = el('div',{class:'stub'});
+  const trow = el('div',{class:'trackrow'},[reachTrack, stub]);
+  const foot = el('div',{class:'foot'});
+  wrap.append(top, trow, foot);
+
+  const reach = () => cfg.reach ? cfg.reach() : cfg.max;
+  const setV = v => { cfg.set(clamp(v, cfg.min, reach())); update(); render(false); };
+  function update(){
+    const v = cfg.get(), r = reach();
+    const frac = (v - cfg.min) / Math.max(1e-9, r - cfg.min);
+    thumb.style.left = (frac * 100) + '%';
+    num.value = fx(v, cfg.dec) + (cfg.unit || '');
+    reachTrack.style.background = cfg.grad ? cfg.grad() : 'var(--bg-subtle)';
+    reachTrack.style.border = '1px solid var(--border)';
+    if (cfg.domainMax){
+      const share = clamp(r / cfg.domainMax, 0.04, 1);
+      reachTrack.style.flex = share + ' 0 0';
+      stub.style.flex = (1 - share) + ' 0 0';
+      stub.style.display = share > 0.995 ? 'none' : 'block';
+    } else { reachTrack.style.flex = '1 1 auto'; stub.style.display = 'none'; }
+    foot.textContent = cfg.foot ? cfg.foot(v) : '';
+    reachTrack.setAttribute('aria-valuemin', fx(cfg.min, cfg.dec));
+    reachTrack.setAttribute('aria-valuemax', fx(r, cfg.dec));
+    reachTrack.setAttribute('aria-valuenow', fx(v, cfg.dec));
+    reachTrack.setAttribute('aria-valuetext', (cfg.vt ? cfg.vt(v) : fx(v, cfg.dec) + (cfg.unit || '')));
+  }
+  const fromX = e => {
+    const b = reachTrack.getBoundingClientRect();
+    return cfg.min + clamp((e.clientX - b.left) / b.width, 0, 1) * (reach() - cfg.min);
+  };
+  reachTrack.addEventListener('pointerdown', e => {
+    reachTrack.setPointerCapture(e.pointerId); wrap.dataset.drag = '1'; setV(fromX(e));
+    const mv = ev => setV(fromX(ev));
+    const up = () => { wrap.dataset.drag = '0'; reachTrack.removeEventListener('pointermove', mv);
+      reachTrack.removeEventListener('pointerup', up); persist(); };
+    reachTrack.addEventListener('pointermove', mv); reachTrack.addEventListener('pointerup', up);
+  });
+  reachTrack.addEventListener('keydown', e => {
+    const dir = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 1 : (e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -1 : 0);
+    if (!dir) return;
+    e.preventDefault();
+    const unit = cfg.step * (e.shiftKey ? 10 : e.altKey ? 0.1 : 1);
+    setV(cfg.get() + dir * unit); persist();
+  });
+  num.addEventListener('change', () => { const v = parseFloat(num.value.replace(/[^0-9.\-]/g,'')); if (!isNaN(v)) setV(v); persist(); update(); });
+  num.addEventListener('keydown', e => { if (e.key === 'Enter') num.blur(); });
+  wrap.update = update; update();
+  return wrap;
+}
+const gradStops = fn => 'linear-gradient(to right,' + Array.from({length:13}, (_,i) => fn(i/12)).join(',') + ')';
+
+/* ========================= 8. rendering ========================= */
+const RAMP_LABEL = { brand:'Brand', error:'Error', warning:'Warning', success:'Success', info:'Info',
+  neutral:'Neutral', warm:'Warm neutral', cool:'Cool neutral' };
+function stripFor(ramp, name){
+  const strip = el('div',{class:'strip'});
+  ramp.stops.forEach(st => {
+    const sel = S.sel.ramp === ramp.id && S.sel.step === st.step;
+    const fg = textOn(st.hex, ramp);
+    const b = el('button',{class:'stop', style:'background:'+st.hex+';color:'+fg, 'data-sel':sel?'1':'0',
+      'aria-label':(name||ramp.id)+' '+st.step+' '+st.hex,
+      onclick:() => { S.sel = {ramp:ramp.id, step:st.step}; render(); persist(); }},[
+      el('div',{class:'n',text:String(st.step)}),
+      el('div',{class:'h',text:st.hex.replace('#','')})
+    ]);
+    const lk = el('span',{class:'lk', 'data-on':st.locked?'1':'0', role:'button', tabindex:'0',
+      title:st.locked?'Unlock stop':'Lock stop', html:st.locked?ICON.lock:ICON.unlock,
+      onclick:ev => { ev.stopPropagation(); toggleLock(ramp.id, st); }});
+    b.appendChild(lk);
+    strip.appendChild(b);
+  });
+  return strip;
+}
+function toggleLock(id, st){
+  const k = id + ':' + st.step;
+  if (S.locks[k]) delete S.locks[k]; else S.locks[k] = st.hex;
+  render(); persist();
+}
+function verticalRamp(ramp){
+  const box = el('div',{class:'vramp'});
+  ramp.stops.forEach(st => {
+    const sel = S.sel.ramp === ramp.id && S.sel.step === st.step;
+    const fg = textOn(st.hex, ramp);
+    const row = el('button',{class:'vstop', style:'background:'+st.hex+';color:'+fg, 'data-sel':sel?'1':'0',
+      onclick:() => { S.sel = {ramp:ramp.id, step:st.step}; render(); persist(); },
+      'aria-label':'Brand '+st.step+' '+st.hex},[
+      el('span',{class:'n',text:String(st.step)}),
+      el('span',{class:'hx',text:st.hex}),
+      el('span',{class:'ok',text:'L '+fx(st.L,3)+'  C '+fx(st.C,3)+'  H '+fx(st.H,1)+'  '+fx(satPct(st.L,st.C,st.H)*100,0)+'%'}),
+      el('span',{class:'cr',text:fx(contrast(st.hex,'#ffffff'),2)+' / '+fx(contrast(st.hex,'#000000'),2)}),
+      el('span',{class:'acts','data-on':st.locked?'1':'0'},[
+        el('span',{role:'button',tabindex:'0',title:st.locked?'Unlock':'Lock',html:st.locked?ICON.lock:ICON.unlock,
+          onclick:ev=>{ev.stopPropagation(); toggleLock(ramp.id, st);}}),
+        el('span',{role:'button',tabindex:'0',title:'Copy hex',html:ICON.copy,
+          onclick:ev=>{ev.stopPropagation(); copy(st.hex, st.hex);}})
+      ])
+    ]);
+    box.appendChild(row);
+  });
+  return box;
+}
+function banner(n){
+  const cls = n.kind === 'warn' ? 'warn' : n.kind === 'err' ? 'err' : n.kind === 'ok' ? 'ok' : 'info';
+  return el('div',{class:'ban '+cls},[ el('span',{html:ICON.info}),
+    el('div',{},[el('div',{class:'t',text:n.t}), el('div',{class:'b',text:n.b})]) ]);
+}
+function rampBlock(ramp, title, sub){
+  const wrap = el('div',{style:'margin-top:24px'});
+  wrap.append(el('div',{class:'between',style:'margin-bottom:8px'},[
+    el('div',{class:'rowb'},[el('h3',{text:title}), el('span',{class:'ms mut mono',text:sub||''})]),
+    el('button',{class:'btn ghost',text:'Copy ramp',onclick:()=>copy(ramp.stops.map(s=>s.hex).join(', '),'Ramp')})
+  ]));
+  wrap.append(stripFor(ramp, title));
+  return wrap;
+}
+
+let sigSlidersBuilt = false;
+function buildSigSliders(){
+  const host = $('#sigSliders'); host.innerHTML = '';
+  const B = () => MODEL.brand;
+  host.append(
+    slider({label:'Intensity — share of gamut ceiling', min:0, max:1, step:0.01, dec:3, unit:'',
+      get:()=> MODEL.intensity, set:v=>S.intensity=v,
+      grad:()=>gradStops(t=>oklchToHex(0.65, t*maxChroma(0.65,B().H), B().H)),
+      foot:v=>fx(v*100,1)+'% of ceiling · C '+fx(chromaAt(0.65,B().H,v),3)+' at L 0.650',
+      vt:v=>fx(v*100,1)+' percent of ceiling'}),
+    slider({label:'Lift — distance from the hue\u2019s natural home', min:-0.35, max:0.35, step:0.01, dec:3,
+      get:()=> MODEL.lift, set:v=>S.lift=v,
+      grad:()=>gradStops(t=>oklchToHex(clamp(peakL(B().H)+(t-0.5)*0.7,0.05,0.99), MODEL.intensity*maxChroma(clamp(peakL(B().H)+(t-0.5)*0.7,0.05,0.99),B().H), B().H)),
+      foot:v=>'peak L for hue '+fx(B().H,1)+' is '+fx(peakL(B().H),3)+' · brand sits at '+fx(B().L,3),
+      vt:v=>fx(v,3)+' lightness from peak'}),
+    slider({label:'Lift applied to semantics', min:0, max:1, step:0.05, dec:2,
+      get:()=>S.liftScale, set:v=>S.liftScale=v, foot:v=>'scale factor on lift, so extreme inputs stay legible'}),
+    slider({label:'Chroma envelope — peak position', min:-3, max:3, step:0.1, dec:1,
+      get:()=>S.envPeak, set:v=>S.envPeak=v,
+      foot:v=>'peak sits near step '+STEPS[clamp(Math.round(5+v),0,10)]}),
+    slider({label:'Chroma envelope — falloff steepness', min:0.4, max:2.5, step:0.05, dec:2,
+      get:()=>S.envSteep, set:v=>S.envSteep=v,
+      foot:v=>'edges at '+fx(envelopeAt(0.97)*100,0)+'% and '+fx(envelopeAt(0.25)*100,0)+'% of intensity'}),
+    slider({label:'Blue purple-shift correction — lightest stop', min:0, max:16, step:0.5, dec:1, unit:'°',
+      get:()=>S.blueHi, set:v=>S.blueHi=v,
+      foot:v=>(norm360(B().H)>=250&&norm360(B().H)<=300 ? 'active on the brand ramp' : 'applies to ramps with a base hue in 250–300°')}),
+    slider({label:'Blue purple-shift correction — darkest stop', min:-12, max:0, step:0.5, dec:1, unit:'°',
+      get:()=>S.blueLo, set:v=>S.blueLo=v, foot:()=>'rotation toward cyan easing to 0° at the base stop'})
+  );
+  sigSlidersBuilt = true;
+}
+let tuneBuilt = false;
+function buildTuneSliders(){
+  const host = $('#tuneSliders'); host.innerHTML = '';
+  host.append(slider({label:'Pull toward the brand hue', min:0, max:1, step:0.05, dec:2,
+    get:()=>S.pull, set:v=>S.pull=v, foot:v=>'0 leaves every anchor untouched; 1 pulls to the window cap'}));
+  ['error','warning','success','info'].forEach(r => host.append(slider({
+    label:r[0].toUpperCase()+r.slice(1)+' anchor', min:0, max:360, step:1, dec:0, unit:'°',
+    get:()=>S.anchors[r], set:v=>S.anchors[r]=v,
+    grad:()=>gradStops(t=>oklchToHex(0.62, MODEL.intensity*maxChroma(0.62,t*360), t*360)),
+    foot:()=>'window ±'+WINDOW[r]+'° · lands at '+fx(MODEL.sem[r].H,1)+'°'})));
+  tuneBuilt = true;
+}
+
+function renderSidebar(){
+  $('#bsw').style.background = MODEL.brandHex;
+  $('#bfmt').textContent = MODEL.fmt;
+  if (document.activeElement !== $('#binput')) $('#binput').value = S.brand;
+  const B = MODEL.brand;
+  const sr = $('#sigread'); sr.innerHTML = '';
+  [['Intensity', fx(MODEL.intensity*100,1)+'%'],
+   ['Lift', (MODEL.lift>=0?'+':'')+fx(MODEL.lift,3)],
+   ['Hue', fx(B.H,1)+'°'],
+   ['L / C', fx(B.L,3)+' / '+fx(B.C,3)],
+   ['Ladder', '11 stops'],
+   ['Drift', (norm360(B.H)>=250&&norm360(B.H)<=300&&S.blueOn) ? '+'+fx(S.blueHi,1)+'° / '+fx(S.blueLo,1)+'°' : 'none']
+  ].forEach(([a,b]) => sr.append(el('div',{},[el('span',{text:a}), el('span',{text:b})])));
+
+  const tree = $('#navtree'); tree.innerHTML = '';
+  const jump = id => { const t = document.getElementById(id); if (t) window.scrollTo({top:t.offsetTop - 72, behavior:'smooth'}); };
+  const mk = (id, label, hex) => el('button',{class:'navitem','aria-current':S.sel.ramp===id?'true':'false',
+    onclick:()=>{ S.sel={ramp:id, step:S.sel.step}; S.mtxRamp = id; render(); persist();
+      jump(id==='brand'?'s-brand':id.startsWith('accent')?'s-accent':['error','warning','success','info'].includes(id)?'s-semantic':'s-neutral'); }},
+    [el('span',{class:'dot',style:'background:'+hex}), el('span',{text:label})]);
+  const R = allRamps();
+  tree.append(mk('brand','Brand', at(R.brand,500).hex));
+  const semGrp = el('div',{class:'nested'});
+  ['error','warning','success','info'].forEach(r => semGrp.append(mk(r, RAMP_LABEL[r], at(R[r],500).hex)));
+  tree.append(el('div',{class:'eyebrow',style:'margin:12px 0 6px;padding:0 8px',text:'Semantic'}), semGrp);
+  const neuGrp = el('div',{class:'nested'});
+  ['neutral','warm','cool'].forEach(r => neuGrp.append(mk(r, RAMP_LABEL[r], at(R[r],500).hex)));
+  tree.append(el('div',{class:'eyebrow',style:'margin:12px 0 6px;padding:0 8px',text:'Neutral'}), neuGrp);
+  if (MODEL.accents.length){
+    const ag = el('div',{class:'nested'});
+    MODEL.accents.forEach((r,i)=>ag.append(mk('accent'+(i+1),'Accent '+(i+1)+' · '+fx(r.baseH,0)+'°', at(r,500).hex)));
+    tree.append(el('div',{class:'eyebrow',style:'margin:12px 0 6px;padding:0 8px',text:'Accents'}), ag);
+  }
+  renderSaved();
+}
+function renderSaved(){
+  const host = $('#saved'); host.innerHTML = '';
+  let list = [];
+  try { list = JSON.parse(localStorage.getItem('csg.saved') || '[]'); } catch(e){}
+  if (!list.length){ host.append(el('p',{class:'cap mut',text:'Nothing saved yet.'})); return; }
+  list.forEach((it,i) => host.append(el('div',{class:'row',style:'gap:6px'},[
+    el('button',{class:'navitem',style:'flex:1',onclick:()=>{ S = Object.assign(JSON.parse(JSON.stringify(DEF)), it.state); render(); persist(); toast('Loaded ' + it.name); }},
+      [el('span',{class:'dot',style:'background:'+it.hex}), el('span',{text:it.name})]),
+    el('button',{class:'iconbtn','aria-label':'Delete '+it.name,text:'×',onclick:()=>{
+      list.splice(i,1); localStorage.setItem('csg.saved', JSON.stringify(list)); renderSaved(); }})
+  ])));
+}
+
+function renderWorkspace(){
+  $('#chipIn').textContent = 'input ' + MODEL.brandHex + '  L ' + fx(MODEL.brand.L,3) + '  C ' + fx(MODEL.brand.C,3) + '  H ' + fx(MODEL.brand.H,1);
+  $('#chipPeak').textContent = 'peak L ' + fx(peakL(MODEL.brand.H),3);
+  $('#chipInt').textContent = 'intensity ' + fx(MODEL.intensity*100,1) + '%';
+  if (!sigSlidersBuilt) buildSigSliders(); else $('#sigSliders').querySelectorAll('.sl').forEach(s=>s.update&&s.update());
+
+  $('#brandMeta').textContent = 'hue ' + fx(MODEL.ramps.brand.baseH,1) + '° · intensity ' + fx(MODEL.intensity*100,1) + '% of ceiling';
+  const br = $('#brandRamp'); br.replaceWith(verticalRamp(MODEL.ramps.brand)); const nb = document.querySelector('.vramp'); nb.id = 'brandRamp';
+
+  const sem = $('#semRamps'); sem.innerHTML = '';
+  ['error','warning','success','info'].forEach(r => {
+    const s = MODEL.sem[r];
+    sem.append(rampBlock(MODEL.ramps[r], RAMP_LABEL[r],
+      'anchor ' + S.anchors[r] + '° → ' + fx(s.H,1) + '° · ' + (s.pulled ? 'pulled toward brand' : 'left at anchor')));
+  });
+  const sn = $('#semNotes'); sn.innerHTML = '';
+  MODEL.notes.forEach(n => sn.append(banner(n)));
+  if (!MODEL.notes.length) sn.append(banner({kind:'ok',t:'No corrections needed',b:'Every role clears 4.5:1 at 600 against 50, all four stay ΔEOK 0.10 apart, and error and success survive deuteranopia.'}));
+
+  if (!tuneBuilt && $('#disTune').open) buildTuneSliders();
+  else if (tuneBuilt) $('#tuneSliders').querySelectorAll('.sl').forEach(s=>s.update&&s.update());
+  const tp = $('#tunePrev'); tp.innerHTML = '';
+  ['error','warning','success','info'].forEach(r => {
+    const base = oklchToHex(MODEL.sem[r].L, MODEL.sem[r].C, MODEL.sem[r].H);
+    const anchorHex = oklchToHex(clamp(peakL(S.anchors[r]),0.45,0.85), MODEL.intensity*maxChroma(clamp(peakL(S.anchors[r]),0.45,0.85), S.anchors[r]), S.anchors[r]);
+    tp.append(el('div',{},[
+      el('div',{class:'row',style:'gap:0'},[
+        el('span',{style:'width:36px;height:36px;border-radius:8px 0 0 8px;background:'+anchorHex}),
+        el('span',{style:'width:36px;height:36px;border-radius:0 8px 8px 0;background:'+base})
+      ]),
+      el('div',{class:'ms mut mono',style:'margin-top:4px',text:r+' · anchor → tuned'})
+    ]));
+  });
+
+  $('#segNeutral').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v===S.neutralMode)));
+  const nt = $('#neutralTint');
+  if (!nt.firstChild) nt.append(slider({label:'Tint amount', min:0, max:8, step:0.5, dec:1, unit:'%',
+    get:()=>S.tint, set:v=>{S.tint=v; if (v>0) S.neutralMode='tinted';},
+    grad:()=>gradStops(t=>oklchToHex(0.65, (t*8/100)*maxChroma(0.65,MODEL.brand.H), MODEL.brand.H)),
+    foot:v=>'chroma at '+fx(v,1)+'% of ceiling, hue locked to '+fx(MODEL.brand.H,1)+'°'}));
+  else nt.querySelectorAll('.sl').forEach(s=>s.update&&s.update());
+  const nr = $('#neuRamps'); nr.innerHTML = '';
+  nr.append(rampBlock(MODEL.ramps.neutral,'Neutral', S.neutralMode==='pure'?'chroma 0':'hue '+fx(MODEL.brand.H,1)+'° at '+fx(S.tint,1)+'% of ceiling'));
+  nr.append(rampBlock(MODEL.ramps.warm,'Warm neutral','hue '+fx(MODEL.ramps.warm.baseH,1)+'°'));
+  nr.append(rampBlock(MODEL.ramps.cool,'Cool neutral','hue '+fx(MODEL.ramps.cool.baseH,1)+'°'));
+
+  $('#segScheme').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v===S.scheme)));
+  const sw = $('#sweepN');
+  if (S.scheme !== 'sweep') sw.innerHTML = '';
+  else if (!sw.firstChild) sw.append(slider({label:'Hues in the sweep', min:2, max:9, step:1, dec:0,
+    get:()=>S.sweepN, set:v=>S.sweepN=Math.round(v), foot:v=>'even intervals of '+fx(360/(Math.round(v)+1),1)+'°'}));
+  else sw.querySelectorAll('.sl').forEach(s=>s.update&&s.update());
+  const ar = $('#accRamps'); ar.innerHTML = '';
+  const an = $('#accNotes'); an.innerHTML = '';
+  MODEL.accents.forEach((r,i) => {
+    ar.append(rampBlock(r,'Accent '+(i+1), (r.offset>0?'+':'')+fx(r.offset,0)+'° from brand · hue '+fx(r.baseH,1)+'°'));
+    if (r.trough) an.append(banner({kind:'info',t:'Accent '+(i+1)+' sits in the cyan trough',
+      b:'Hue '+fx(r.baseH,1)+'° tops out near C '+fx(maxChroma(0.65,r.baseH),3)+', so it will read quieter than its neighbours at the same intensity. Nudging it 20° out clears the trough.'}));
+  });
+  if (MODEL.accents.some(r=>r.trough))
+    an.append(el('button',{class:'btn sec',style:'margin-top:8px',text:'Nudge out of the trough',onclick:()=>{
+      S.scheme = S.scheme === 'analogous' ? 'triad' : 'analogous'; render(); persist();
+      toast('Scheme changed to clear the 185–215° band'); }}));
+
+  const ld = $('#ldPair'); ld.innerHTML = '';
+  [['Light', MODEL.ramps], ['Dark', MODEL.dark]].forEach(([lbl, set]) => {
+    const box = el('div',{});
+    box.append(el('div',{class:'eyebrow',style:'margin-bottom:8px',text:lbl}));
+    ['brand','error','success','neutral'].forEach(k => {
+      const r = set[k]; if (!r) return;
+      box.append(el('div',{class:'ms mut mono',style:'margin:10px 0 4px',text:RAMP_LABEL[k]||k}));
+      box.append(stripFor(r, (RAMP_LABEL[k]||k)+' '+lbl));
+    });
+    ld.append(box);
+  });
+
+  renderPreview();
+  renderMatrix();
+  renderExport();
+}
+
+function renderPreview(){
+  $('#segPvTheme').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===S.pvTheme)));
+  const dark = S.pvTheme === 'dark';
+  const set = dark ? MODEL.dark : MODEL.ramps;
+  const N = set.neutral || MODEL.ramps.neutral;
+  const g = (r, step) => at(set[r] || MODEL.ramps[r], step).hex;
+  const page = dark ? at(N,50).hex : '#ffffff';
+  const surf = dark ? at(N,100).hex : '#ffffff';
+  const line = dark ? at(N,200).hex : at(N,100).hex;
+  const tx   = dark ? at(N,950).hex : at(N,900).hex;
+  const tx2  = dark ? at(N,700).hex : at(N,600).hex;
+  const host = $('#preview'); host.innerHTML = '';
+  const pv = el('div',{class:'pv',style:'background:'+page+';border-color:'+line+';color:'+tx});
+
+  const pill = (role, label) => el('span',{class:'pill', style:'background:'+g(role, dark?800:100)+';color:'+g(role, dark?200:700), text:label});
+  const btn = (label, kind) => el('span',{class:'pbtn', style: kind==='pri'
+    ? 'background:'+ (dark? at(N,950).hex : at(N,900).hex) +';color:'+ (dark? at(N,50).hex : '#ffffff')
+    : 'background:'+surf+';border-color:'+line+';color:'+tx, text:label});
+
+  pv.append(el('div',{class:'row',style:'gap:8px;flex-wrap:wrap'},[btn('Save changes','pri'), btn('Cancel','sec'),
+    el('span',{class:'ms',style:'color:'+tx2,text:'Buttons stay near-black; only status and data carry color.'})]));
+
+  pv.append(el('div',{class:'pvcard',style:'background:'+surf+';border-color:'+line},[
+    el('div',{class:'label',text:'Invite a teammate'}),
+    el('div',{class:'fld',style:'margin-top:12px'},[
+      el('span',{class:'ms',style:'color:'+tx2,text:'Work email'}),
+      el('span',{class:'inp',style:'background:'+page+';border-color:'+g('error',dark?600:600)+';color:'+tx,text:'ada@'}),
+      el('span',{class:'ms mono',style:'color:'+g('error',dark?200:700),text:'Enter a full email address.'})
+    ])
+  ]));
+
+  pv.append(el('div',{style:'background:'+g('warning',dark?800:50)+';border:1px solid '+g('warning',dark?700:100)+';border-radius:8px;padding:12px 16px'},[
+    el('div',{class:'label',style:'color:'+g('warning',dark?100:700),text:'Seats are nearly full'}),
+    el('div',{class:'ms',style:'color:'+(dark?g('warning',200):tx2),text:'Two seats left on the current plan.'})
+  ]));
+
+  const tbl = el('table',{class:'ptbl'});
+  tbl.append(el('thead',{},[el('tr',{},[
+    el('th',{style:'color:'+tx2,text:'Run'}), el('th',{style:'color:'+tx2,text:'Duration'}), el('th',{style:'color:'+tx2,text:'Status'})])]));
+  const tb = el('tbody',{});
+  [['build-4821','1m 12s','success','Passed'],['build-4820','58s','error','Failed'],
+   ['build-4819','2m 04s','warning','Flaky'],['build-4818','1m 33s','info','Queued']].forEach(row => {
+    tb.append(el('tr',{},[
+      el('td',{class:'m',style:'border-color:'+line+';font-family:var(--font-mono);font-size:12px',text:row[0]}),
+      el('td',{style:'border-color:'+line+';font-family:var(--font-mono);font-size:12px;color:'+tx2,text:row[1]}),
+      el('td',{style:'border-color:'+line},[pill(row[2],row[3])])
+    ]));
+  });
+  tbl.append(tb);
+  pv.append(el('div',{class:'pvcard',style:'background:'+surf+';border-color:'+line},[tbl]));
+
+  const chart = el('div',{class:'chart'});
+  const series = [g('brand',500), g('info',500), g('success',500), g('warning',500)];
+  [[62,40,78,30],[48,72,36,58],[80,52,44,66],[34,64,70,42],[70,38,56,74],[52,80,30,48]].forEach(grp => {
+    const gd = el('div',{class:'grp'});
+    grp.forEach((v,i) => gd.append(el('div',{class:'bar',style:'height:'+v+'%;background:'+series[i]})));
+    chart.append(gd);
+  });
+  pv.append(el('div',{class:'pvcard',style:'background:'+surf+';border-color:'+line},[
+    el('div',{class:'label',text:'Runs per day'}),
+    el('div',{class:'ms',style:'color:'+tx2+';margin-top:2px',text:'Four series from the generated system.'}), chart]));
+
+  pv.append(el('div',{class:'row',style:'justify-content:flex-end'},[
+    el('div',{class:'toast',style:'background:'+g('success',dark?800:50)+';border:1px solid '+g('success',dark?700:100)+';color:'+g('success',dark?100:700)},[
+      el('span',{class:'label',text:'System saved'}),
+      el('span',{class:'ms',style:'opacity:.8',text:'11 stops × 8 ramps'})
+    ])
+  ]));
+  host.append(pv);
+}
+
+function renderMatrix(){
+  $('#segMtx').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===S.mtxMetric)));
+  const sel = $('#mtxRamp'), R = allRamps();
+  if (sel.options.length !== Object.keys(R).length){
+    sel.innerHTML = '';
+    Object.keys(R).forEach(k => sel.append(el('option',{value:k,text:RAMP_LABEL[k] || ('Accent '+k.replace('accent',''))})));
+  }
+  sel.value = S.mtxRamp in R ? S.mtxRamp : 'brand';
+  const ramp = R[sel.value] || R.brand;
+  const t = $('#mtx'); t.innerHTML = '';
+  const head = el('tr',{},[el('th',{text:''})]);
+  ramp.stops.forEach(s => head.append(el('th',{text:String(s.step)})));
+  t.append(el('thead',{},[head]));
+  const body = el('tbody',{});
+  ramp.stops.forEach(bg => {
+    const tr = el('tr',{},[el('th',{style:'text-align:right;padding-right:6px',text:String(bg.step)})]);
+    ramp.stops.forEach(fg => {
+      if (bg.step === fg.step){ tr.append(el('td',{class:'dim',style:'background:'+bg.hex})); return; }
+      const cr = contrast(bg.hex, fg.hex), lc = Math.abs(apca(fg.hex, bg.hex));
+      const val = S.mtxMetric === 'wcag' ? fx(cr,1) : fx(lc,0);
+      const badge = S.mtxMetric === 'wcag' ? (cr>=7?'AAA':cr>=4.5?'AA':cr>=3?'AA·L':'') : (lc>=75?'body':lc>=60?'sub':lc>=45?'large':'');
+      const dim = S.mtxMetric === 'wcag' ? cr < 3 : lc < 45;
+      tr.append(el('td',{class:dim?'dim':'', style:'background:'+bg.hex+';color:'+fg.hex,
+        title:bg.step+' behind '+fg.step+' — '+fx(cr,2)+':1, APCA Lc '+fx(lc,1),
+        html:val+'<span class="bd">'+badge+'</span>'}));
+    });
+    body.append(tr);
+  });
+  t.append(body);
+}
+
+/* ========================= 9. export ========================= */
+function tokenList(){
+  const out = [];
+  const R = allRamps();
+  Object.keys(R).forEach(k => R[k].stops.forEach(s => out.push({name:k+'-'+s.step, group:k, step:s.step, s})));
+  MODEL.dark.brand && Object.keys(MODEL.dark).forEach(k => MODEL.dark[k].stops.forEach(s =>
+    out.push({name:'dark-'+k+'-'+s.step, group:'dark-'+k, step:s.step, s})));
+  return out;
+}
+const okstr = s => 'oklch(' + fx(s.L,4) + ' ' + fx(s.C,4) + ' ' + fx(s.H,2) + ')';
+function exportText(fmt){
+  const T = tokenList();
+  if (fmt === 'css'){
+    let o = ':root {\n' + T.map(t => '  --' + t.name + ': ' + t.s.hex + ';').join('\n') + '\n}\n\n';
+    o += '@supports (color: oklch(0% 0 0)) {\n  :root {\n' + T.map(t => '    --' + t.name + ': ' + okstr(t.s) + ';').join('\n') + '\n  }\n}\n';
+    if (S.p3) o += '\n@media (color-gamut: p3) {\n  :root {\n' + T.map(t => {
+      const p = oklchToP3(t.s.L, t.s.C, t.s.H);
+      return '    --' + t.name + ': color(display-p3 ' + p.map(v=>fx(v,4)).join(' ') + ');';
+    }).join('\n') + '\n  }\n}\n';
+    return o;
+  }
+  if (fmt === 'tw') return '@theme {\n' + T.map(t => '  --color-' + t.name + ': ' + okstr(t.s) + ';').join('\n') + '\n}\n';
+  if (fmt === 'scss'){
+    const groups = {};
+    T.forEach(t => (groups[t.group] = groups[t.group] || []).push(t));
+    return Object.keys(groups).map(g => '$' + g + ': (\n' +
+      groups[g].map(t => '  ' + t.step + ': ' + t.s.hex + ',').join('\n') + '\n);').join('\n\n') + '\n';
+  }
+  if (fmt === 'json') return JSON.stringify(Object.fromEntries(T.map(t => [t.name, t.s.hex])), null, 2);
+  if (fmt === 'jsonn'){
+    const o = {};
+    T.forEach(t => { (o[t.group] = o[t.group] || {})[t.step] = t.s.hex; });
+    return JSON.stringify(o, null, 2);
+  }
+  if (fmt === 'dtcg'){
+    const o = {};
+    T.forEach(t => { (o[t.group] = o[t.group] || {})[t.step] = {$type:'color', $value:t.s.hex,
+      $description:'L ' + fx(t.s.L,3) + ' C ' + fx(t.s.C,3) + ' H ' + fx(t.s.H,1)}; });
+    return JSON.stringify({$schema:'https://design-tokens.org/schema.json', color:o}, null, 2);
+  }
+  if (fmt === 'svg'){
+    const R = allRamps(), keys = Object.keys(R), w = 11*88 + 120, h = keys.length*72 + 40;
+    let s = '<svg xmlns="http://www.w3.org/2000/svg" width="' + w + '" height="' + h + '" font-family="monospace" font-size="11">\n';
+    keys.forEach((k,r) => {
+      s += '  <text x="8" y="' + (r*72 + 60) + '" font-size="12">' + k + '</text>\n';
+      R[k].stops.forEach((st,c) => {
+        s += '  <rect x="' + (120 + c*88) + '" y="' + (r*72 + 30) + '" width="86" height="60" fill="' + st.hex + '"/>\n';
+        s += '  <text x="' + (126 + c*88) + '" y="' + (r*72 + 82) + '" fill="' + textOn(st.hex, R[k]) + '">' + st.hex + '</text>\n';
+      });
+    });
+    s += '</svg>\n';
+    return s;
+  }
+  return '';
+}
+function highlight(txt, fmt){
+  const esc = txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  if (fmt === 'svg') return esc;
+  return esc
+    .replace(/(\/\*[^]*?\*\/|\/\/[^\n]*)/g, '<span class="cm">$1</span>')
+    .replace(/(--[a-z0-9\-]+|@[a-z\-]+|\$[a-z0-9\-]+|"\$?[a-z\-]+")/gi, '<span class="kw">$1</span>')
+    .replace(/(#[0-9a-f]{6}|oklch\([^)]*\)|color\(display-p3[^)]*\))/gi, '<span class="st">$1</span>');
+}
+function renderExport(){
+  $('#segFmt').querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===S.fmt)));
+  $('#btnP3').setAttribute('aria-pressed', String(!!S.p3));
+  $('#btnP3').textContent = (S.p3 ? 'Remove' : 'Include') + ' P3 upgrade block';
+  const txt = exportText(S.fmt);
+  $('#codeOut').innerHTML = '<code>' + highlight(txt, S.fmt) + '</code>';
+  $('#codeOut').dataset.raw = '';
+  renderExport.raw = txt;
+}
+
+/* ========================= 10. inspector ========================= */
+function renderInspector(){
+  const R = allRamps();
+  const ramp = R[S.sel.ramp] || R.brand;
+  const st = at(ramp, S.sel.step) || at(ramp, 500);
+  const host = $('#inspBody'); host.innerHTML = '';
+  host.append(el('div',{class:'row',style:'gap:8px;margin-bottom:12px'},[
+    el('span',{style:'width:40px;height:40px;border-radius:8px;border:1px solid var(--border);background:'+st.hex}),
+    el('div',{},[
+      el('div',{class:'label',text:(RAMP_LABEL[S.sel.ramp] || 'Accent ' + S.sel.ramp.replace('accent','')) + ' ' + st.step}),
+      el('div',{class:'ms mut mono',text:st.hex + (st.locked ? ' · locked' : '')})
+    ])
+  ]));
+  const setStop = (L,C,H) => {
+    S.locks[ramp.id + ':' + st.step] = oklchToHex(L, clamp(C,0,maxChroma(L,H)), H);
+    render(false);
+  };
+  const cur = () => { const k = S.locks[ramp.id + ':' + st.step]; return k ? hexToOklch(k) : {L:st.L,C:st.C,H:st.H}; };
+  host.append(
+    slider({label:'Lightness', min:0.05, max:0.99, step:0.01, dec:3,
+      get:()=>cur().L, set:v=>{const c=cur(); setStop(v,c.C,c.H);},
+      grad:()=>gradStops(t=>{const c=cur(); const L=0.05+t*0.94; return oklchToHex(L, Math.min(c.C, maxChroma(L,c.H)), c.H);}),
+      foot:v=>'peak L for this hue is '+fx(peakL(cur().H),3)}),
+    slider({label:'Chroma', min:0, max:0.4, step:0.001, dec:3, domainMax:0.4,
+      reach:()=>maxChroma(cur().L, cur().H),
+      get:()=>cur().C, set:v=>{const c=cur(); setStop(c.L,v,c.H);},
+      grad:()=>gradStops(t=>{const c=cur(); return oklchToHex(c.L, t*maxChroma(c.L,c.H), c.H);}),
+      foot:v=>{const c=cur(); const mc=maxChroma(c.L,c.H);
+        return fx(v,3)+' · '+fx(mc>0?v/mc*100:0,1)+'% of ceiling · ceiling '+fx(mc,3);},
+      vt:v=>{const c=cur(); const mc=maxChroma(c.L,c.H); return fx(v,3)+', '+fx(mc>0?v/mc*100:0,0)+' percent of the ceiling for this lightness and hue';}}),
+    slider({label:'Hue', min:0, max:360, step:1, dec:1, unit:'°',
+      get:()=>cur().H, set:v=>{const c=cur(); setStop(c.L,c.C,v);},
+      grad:()=>gradStops(t=>{const c=cur(); const H=t*360; return oklchToHex(c.L, Math.min(c.C, maxChroma(c.L,H)), H);}),
+      foot:v=>'ceiling here is C '+fx(maxChroma(cur().L, v),3)})
+  );
+  const c = cur();
+  const rows = [
+    ['OKLCH', fx(c.L,4)+' '+fx(c.C,4)+' '+fx(c.H,2)],
+    ['Intensity', fx(satPct(c.L,c.C,c.H)*100,1)+'%'],
+    ['On white', fx(contrast(st.hex,'#ffffff'),2)+':1'],
+    ['On black', fx(contrast(st.hex,'#000000'),2)+':1'],
+    ['APCA on white', fx(Math.abs(apca(st.hex,'#ffffff')),1)+' Lc'],
+    ['vs ramp 900', fx(contrast(st.hex, at(ramp,900).hex),2)+':1'],
+    ['P3 hex', oklchToP3Hex(c.L,c.C,c.H)]
+  ];
+  const sr = el('div',{class:'sigread',style:'margin-top:16px'});
+  rows.forEach(([a,b]) => sr.append(el('div',{},[el('span',{text:a}), el('span',{text:b})])));
+  host.append(el('div',{class:'eyebrow',style:'margin-top:20px',text:'Readouts'}), sr);
+  host.append(el('div',{class:'row',style:'margin-top:16px;gap:6px;flex-wrap:wrap'},[
+    el('button',{class:'btn sec',style:'flex:1',text:st.locked?'Unlock stop':'Lock stop',onclick:()=>toggleLock(ramp.id, st)}),
+    el('button',{class:'btn sec',style:'flex:1',text:'Copy hex',onclick:()=>copy(st.hex, st.hex)})
+  ]));
+  host.append(el('hr',{}));
+  host.append(el('div',{class:'eyebrow',style:'margin-bottom:8px',text:'Export'}));
+  host.append(el('div',{class:'wrap'},[
+    el('button',{class:'btn sec',text:'CSS',onclick:()=>copy(exportText('css'),'CSS')}),
+    el('button',{class:'btn sec',text:'Tailwind',onclick:()=>copy(exportText('tw'),'Tailwind theme')}),
+    el('button',{class:'btn sec',text:'JSON',onclick:()=>copy(exportText('json'),'JSON')}),
+    el('button',{class:'btn sec',text:'DTCG',onclick:()=>copy(exportText('dtcg'),'DTCG tokens')}),
+    el('button',{class:'btn sec',text:'Share link',onclick:shareLink})
+  ]));
+}
+
+/* ========================= 11. render root ========================= */
+let raf = null;
+function render(full){
+  if (full !== false){ build(); renderSidebar(); renderWorkspace(); renderInspector(); persist(); return; }
+  if (raf) return;
+  raf = requestAnimationFrame(() => {
+    raf = null; build();
+    renderSidebar(); renderWorkspace();
+    $('#inspBody').querySelectorAll('.sl').forEach(s => s.update && s.update());
+    persist();
+  });
+}
+
+/* ========================= 12. wiring ========================= */
+function shareLink(){
+  location.hash = encodeState();
+  copy(location.href, 'Share link');
+}
+$('#binput').addEventListener('input', e => {
+  const p = parseColor(e.target.value);
+  $('#bfmt').textContent = p ? p.fmt : 'unrecognised';
+  if (p){ S.brand = e.target.value; S.intensity = null; S.lift = null; S.locks = {}; render(false); }
+});
+$('#btnSig').addEventListener('click', () => window.scrollTo({top: document.getElementById('s-signature').offsetTop - 72, behavior:'smooth'}));
+$('#btnExport').addEventListener('click', () => window.scrollTo({top: document.getElementById('s-export').offsetTop - 64, behavior:'smooth'}));
+$('#btnSigReset').addEventListener('click', () => { S.intensity = null; S.lift = null; render(); toast('Signature reset to the extracted values'); });
+$('#btnShare').addEventListener('click', shareLink);
+$('#btnShare2').addEventListener('click', shareLink);
+$('#btnCopyCode').addEventListener('click', () => copy(renderExport.raw || exportText(S.fmt), 'Export'));
+$('#btnP3').addEventListener('click', () => { S.p3 = !S.p3; renderExport(); persist(); });
+$('#btnSave').addEventListener('click', () => {
+  let list = []; try { list = JSON.parse(localStorage.getItem('csg.saved') || '[]'); } catch(e){}
+  list.unshift({ name: MODEL.brandHex, hex: MODEL.brandHex, state: JSON.parse(JSON.stringify(S)) });
+  localStorage.setItem('csg.saved', JSON.stringify(list.slice(0,8)));
+  renderSaved(); toast('Saved ' + MODEL.brandHex);
+});
+$('#btnReset').addEventListener('click', () => { S = JSON.parse(JSON.stringify(DEF)); S.theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+  location.hash = ''; render(); toast('Reset to defaults'); });
+$('#segNeutral').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+  S.neutralMode = b.dataset.v; render(); persist(); });
+$('#segScheme').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+  S.scheme = b.dataset.v; render(); persist(); });
+$('#segPvTheme').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+  S.pvTheme = b.dataset.v; renderPreview(); persist(); });
+$('#segMtx').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+  S.mtxMetric = b.dataset.v; renderMatrix(); persist(); });
+$('#mtxRamp').addEventListener('change', e => { S.mtxRamp = e.target.value; renderMatrix(); persist(); });
+$('#segFmt').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+  S.fmt = b.dataset.v; renderExport(); persist(); });
+$('#disTune').addEventListener('toggle', () => { if ($('#disTune').open && !tuneBuilt) buildTuneSliders(); });
+$('#hamb').addEventListener('click', () => { const s = $('#side'); s.dataset.open = s.dataset.open === '1' ? '0' : '1'; });
+
+/* theme */
+function applyTheme(){
+  const dark = S.theme ? S.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.classList.toggle('dark', dark);
+  $('#btnTheme').setAttribute('aria-pressed', String(dark));
+}
+$('#btnTheme').addEventListener('click', () => {
+  S.theme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
+  applyTheme(); persist();
+});
+
+/* cvd */
+function applyCvd(){
+  const m = cvdMatrix(S.cvd);
+  const vals = S.cvd === 'none' ? '1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0'
+    : m.map(r => r.map(v => fx(v,6)).join(' ') + ' 0 0').join(' ') + ' 0 0 0 1 0';
+  document.getElementById('cvdm').setAttribute('values', vals);
+  document.getElementById('app').style.filter = S.cvd === 'none' ? 'none' : 'url(#cvd)';
+  $('#segCvd').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === S.cvd)));
+  $('#btnCvd').setAttribute('aria-pressed', String(S.cvd !== 'none'));
+}
+$('#segCvd').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return;
+  S.cvd = b.dataset.v; applyCvd(); persist(); });
+$('#btnCvd').addEventListener('click', () => { S.cvd = S.cvd === 'none' ? 'deut' : 'none'; applyCvd(); persist();
+  window.scrollTo({top: document.getElementById('s-a11y').offsetTop - 64, behavior:'smooth'}); });
+
+/* eyedropper */
+if ('EyeDropper' in window){
+  const b = $('#btnPick'); b.style.display = '';
+  b.addEventListener('click', async () => {
+    try { const r = await new window.EyeDropper().open(); S.brand = r.sRGBHex; S.intensity = null; S.lift = null; S.locks = {}; render(); }
+    catch(e){}
+  });
+}
+
+/* image → k-means in OKLab */
+$('#btnImg').addEventListener('click', () => $('#fileImg').click());
+$('#fileImg').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image();
+  img.onload = () => {
+    const W = 72, H = Math.max(1, Math.round(W * img.height / img.width));
+    const cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const ctx = cv.getContext('2d'); ctx.drawImage(img, 0, 0, W, H);
+    const d = ctx.getImageData(0,0,W,H).data, pts = [];
+    for (let i = 0; i < d.length; i += 4){
+      if (d[i+3] < 200) continue;
+      const hex = '#' + [d[i],d[i+1],d[i+2]].map(v=>v.toString(16).padStart(2,'0')).join('');
+      const {L,C,H:h} = hexToOklch(hex); const r = h*Math.PI/180;
+      pts.push([L, C*Math.cos(r), C*Math.sin(r)]);
+    }
+    if (!pts.length) return;
+    let cent = Array.from({length:6}, (_,i) => pts[Math.floor(pts.length * (i + 0.5) / 6)].slice());
+    for (let it = 0; it < 14; it++){
+      const sums = cent.map(()=>[0,0,0,0]);
+      pts.forEach(p => {
+        let bi = 0, bd = Infinity;
+        cent.forEach((c,ci) => { const dd = (p[0]-c[0])**2 + (p[1]-c[1])**2 + (p[2]-c[2])**2; if (dd < bd){bd=dd;bi=ci;} });
+        sums[bi][0]+=p[0]; sums[bi][1]+=p[1]; sums[bi][2]+=p[2]; sums[bi][3]++;
+      });
+      cent = cent.map((c,i) => sums[i][3] ? [sums[i][0]/sums[i][3], sums[i][1]/sums[i][3], sums[i][2]/sums[i][3]] : c);
+    }
+    const out = $('#imgOut'); out.innerHTML = ''; out.style.display = 'grid';
+    cent.map(c => oklchToHex(c[0], Math.hypot(c[1],c[2]), norm360(Math.atan2(c[2],c[1])*180/Math.PI)))
+      .forEach(hex => out.append(el('button',{style:'background:'+hex,'aria-label':'Adopt '+hex,
+        onclick:()=>{ S.brand = hex; S.intensity=null; S.lift=null; S.locks={}; render(); toast('Brand set to '+hex); }},
+        [el('span',{class:'mono',text:hex})])));
+  };
+  img.src = URL.createObjectURL(f);
+});
+
+/* analyze + harmonize */
+const parseList = () => ($('#anIn').value.match(/#?[0-9a-fA-F]{3,8}|rgb\([^)]*\)|hsl\([^)]*\)|oklch\([^)]*\)/g) || [])
+  .map(s => parseColor(s.startsWith('#') || /^[0-9a-fA-F]{6}$/.test(s) ? (s.startsWith('#') ? s : '#'+s) : s)).filter(Boolean).map(p => p.hex);
+$('#btnAn').addEventListener('click', () => {
+  const list = parseList(), out = $('#anOut'); out.innerHTML = '';
+  if (!list.length){ out.append(el('div',{class:'ban info'},[el('span',{html:ICON.info}),
+    el('div',{},[el('div',{class:'t',text:'Nothing to read'}),el('div',{class:'b',text:'Paste hex values separated by commas or newlines.'})])])); return; }
+  const rows = list.map(hex => { const o = hexToOklch(hex); return {hex, o, sat: satPct(o.L,o.C,o.H)}; });
+  const t = el('table',{class:'tbl'});
+  t.append(el('thead',{},[el('tr',{},['','Hex','L','C','Intensity','H'].map(h=>el('th',{text:h})))]));
+  const tb = el('tbody',{});
+  rows.forEach(r => tb.append(el('tr',{},[
+    el('td',{},[el('div',{class:'sw',style:'background:'+r.hex})]),
+    el('td',{class:'m',text:r.hex}), el('td',{class:'m',text:fx(r.o.L,3)}), el('td',{class:'m',text:fx(r.o.C,3)}),
+    el('td',{class:'m',text:fx(r.sat*100,1)+'%'}), el('td',{class:'m',text:fx(r.o.H,1)+'°'})
+  ])));
+  t.append(tb); out.append(t);
+  const sats = rows.map(r=>r.sat), spread = Math.max(...sats) - Math.min(...sats);
+  const trough = rows.filter(r => r.o.H >= 185 && r.o.H <= 215);
+  const ls = rows.map(r=>r.o.L).sort((a,b)=>b-a);
+  const gaps = ls.slice(1).map((v,i)=>ls[i]-v), gapSpread = gaps.length ? Math.max(...gaps) - Math.min(...gaps) : 0;
+  const diag = [];
+  if (spread > 0.12) diag.push('Intensity ranges from ' + fx(Math.min(...sats)*100,0) + '% to ' + fx(Math.max(...sats)*100,0) + '% of ceiling — a ' + fx(spread*100,0) + '-point spread reads as unrelated colors.');
+  if (gapSpread > 0.06) diag.push('Lightness steps are uneven; the largest gap is ' + fx(Math.max(...gaps),3) + ' against a smallest of ' + fx(Math.min(...gaps),3) + '.');
+  if (trough.length) diag.push(trough.length + ' color' + (trough.length>1?'s':'') + ' sit in the 185–215° cyan trough, where the ceiling is low, so they read quieter than the rest.');
+  out.append(banner({kind: diag.length ? 'warn' : 'ok', t: diag.length ? 'What is inconsistent' : 'This palette is already consistent',
+    b: diag.length ? diag.join(' ') : 'Intensity holds within 12 points and the lightness steps are even.'}));
+});
+$('#btnHarm').addEventListener('click', () => {
+  const list = parseList(); if (!list.length){ toast('Paste some hex values first'); return; }
+  const target = MODEL.intensity;
+  const fixed = list.map(hex => { const o = hexToOklch(hex);
+    const L = clamp(peakL(o.H) + S.liftScale * MODEL.lift, 0.4, 0.9);
+    return oklchToHex(L, target * maxChroma(L, o.H), o.H); });
+  $('#anIn').value = fixed.join(', ');
+  $('#btnAn').click();
+  $('#anOut').prepend(banner({kind:'info', t:'Rewritten onto the current signature',
+    b:'Every hue was kept and re-issued at ' + fx(target*100,1) + '% of its own ceiling, on the lightness its hue reaches most cleanly.'}));
+});
+
+/* inspector collapse on narrow viewports */
+const inspToggle = $('#inspToggle');
+let narrowSeen = false;
+function checkNarrow(){
+  const narrow = matchMedia('(max-width:1279px)').matches;
+  inspToggle.style.display = narrow ? 'grid' : 'none';
+  $('#insp').dataset.open = narrow ? (narrowSeen ? $('#insp').dataset.open : '0') : '1';
+  narrowSeen = narrowSeen || narrow;
+}
+inspToggle.addEventListener('click', () => { const i = $('#insp'); i.dataset.open = i.dataset.open === '1' ? '0' : '1'; });
+addEventListener('resize', checkNarrow);
+
+/* ========================= 13. boot + math self-test ========================= */
+loadState();
+applyTheme(); applyCvd(); checkNarrow();
+render();
+
+(function selfTest(){
+  const o = hexToOklch('#5b93eb');
+  const back = oklchToHex(o.L, o.C, o.H);
+  let lossless = true;
+  for (let i = 0; i < 400; i++){
+    const hex = '#' + Array.from({length:3}, () => Math.floor(Math.random()*256).toString(16).padStart(2,'0')).join('');
+    const c = hexToOklch(hex);
+    if (oklchToHex(c.L, c.C, c.H) !== hex){ lossless = false; break; }
+  }
+  const sem = MODEL.sem;
+  $('#mathTest').textContent =
+    'self-test  #5b93eb → L ' + fx(o.L,3) + ' C ' + fx(o.C,3) + ' H ' + fx(o.H,1) + ' → ' + back +
+    '  ·  round-trip ' + (back === '#5b93eb' && lossless ? 'lossless' : 'FAILED') +
+    '  ·  error hue ' + fx(sem.error.H,1) + '°, intensity Δ ' + fx(Math.abs(satPct(sem.error.L,sem.error.C,sem.error.H) - MODEL.intensity),3) +
+    '  ·  warning L ' + fx(sem.warning.L,3) + ' vs brand L ' + fx(MODEL.brand.L,3);
+})();
+</script>
+</body>
+</html>
