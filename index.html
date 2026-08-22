@@ -1389,11 +1389,24 @@ function renderInspector(){
       el('div',{class:'ms mut mono',text:st.hex + (st.locked ? ' · locked' : '')})
     ])
   ]));
+  const isRoot = ramp.id === 'brand' && st.step === 500;
   const setStop = (L,C,H) => {
-    S.locks[ramp.id + ':' + st.step] = oklchToHex(L, clamp(C,0,maxChroma(L,H)), H);
+    const hex = oklchToHex(L, clamp(C,0,maxChroma(L,H)), H);
+    if (isRoot){
+      // Brand 500 is the system root: rewrite the seed color itself so the
+      // whole engine (ramps, semantics, neutrals) regenerates from it,
+      // instead of locking it as a one-off override.
+      S.brand = hex; S.intensity = null; S.lift = null;
+      delete S.locks['brand:500'];
+    } else {
+      S.locks[ramp.id + ':' + st.step] = hex;
+    }
     render(false);
   };
-  const cur = () => { const k = S.locks[ramp.id + ':' + st.step]; return k ? hexToOklch(k) : {L:st.L,C:st.C,H:st.H}; };
+  const cur = () => {
+    if (isRoot) return MODEL.brand;
+    const k = S.locks[ramp.id + ':' + st.step]; return k ? hexToOklch(k) : {L:st.L,C:st.C,H:st.H};
+  };
   host.append(
     slider({label:'Lightness', min:0.05, max:0.99, step:0.01, dec:3,
       get:()=>cur().L, set:v=>{const c=cur(); setStop(v,c.C,c.H);},
