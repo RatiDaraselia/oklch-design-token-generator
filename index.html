@@ -1510,27 +1510,47 @@
       font-family: var(--font-mono); font-size: 12px; color: var(--fig-num)
     }
 
-    /* inspector sliders */
-    .insp .sl { padding: 0; border-bottom: 0; display: flex; flex-direction: column; gap: 8px }
-    .insp .sl .top { gap: 12px }
+    /* slider — ONE spec, shared by the inspector, the Family signature card,
+       the Semantic tuning card and the inline neutral / accent sliders */
+    .sl {
+      display: flex; flex-direction: column; gap: 8px;
+      padding: 12px 0; border-bottom: 1px solid var(--fig-rule)
+    }
+    .sl:last-child { border-bottom: 0 }
+    .insp .sl { padding: 0; border-bottom: 0 }
+    .sl .top { gap: 12px }
+    /* Two label roles, one type scale. Short property names (the inspector's
+       LIGHTNESS / CHROMA / HUE) are uppercase micro-labels; the descriptive
+       sentence labels on the Family signature and tuning sliders keep sentence
+       case at the same size, and take the row-label grey used in the sidebar. */
+    .sl .top label {
+      font-family: var(--font-sans); font-size: 12px; line-height: 16px; font-weight: 500;
+      letter-spacing: 0; color: var(--fig-muted); text-wrap: balance
+    }
     .insp .sl .top label {
-      font-family: var(--font-sans); font-size: 12px; line-height: 14px; font-weight: 600;
-      letter-spacing: .3px; text-transform: uppercase; color: var(--fig-label)
+      line-height: 14px; font-weight: 600; letter-spacing: .3px;
+      text-transform: uppercase; color: var(--fig-label)
     }
-    .insp .sl .top input {
-      width: 72px; height: 28px; padding: 0 12px; text-align: center; background: var(--fig-field);
-      border: .5px solid var(--fig-border); border-radius: 8px; font-family: var(--font-mono);
-      font-size: 12px; line-height: 14px; color: var(--fig-num)
+    .sl .top input {
+      width: 72px; height: 28px; padding: 0 12px; flex: none; text-align: center;
+      background: var(--fig-field); border: .5px solid var(--fig-border); border-radius: 8px;
+      font-family: var(--font-mono); font-size: 12px; line-height: 14px; color: var(--fig-num)
     }
-    .insp .sl .trackrow { margin-top: 4px; height: 24px }
-    .insp .sl .track { height: 6px; border-radius: 999px }
-    .insp .sl .stub { height: 6px; background: var(--bg-subtle); border: .5px solid var(--fig-border); border-left: 0 }
-    .insp .sl .thumb {
+    .sl .trackrow { margin-top: 4px; height: 24px }
+    .sl .track { height: 6px; border-radius: 999px }
+    .sl .stub { height: 6px; background: var(--bg-subtle); border: .5px solid var(--fig-border); border-left: 0 }
+    .sl .thumb {
       background: var(--fig-field); border: .5px solid var(--fig-rule);
       box-shadow: 0 1px 2px rgb(0 0 0 / .04), 0 4px 12px rgb(0 0 0 / .04)
     }
-    .insp .sl .foot {
+    .sl .foot {
       margin-top: 0; font-family: var(--font-mono); font-size: 12px; line-height: 14px; color: var(--fig-foot)
+    }
+
+    /* readout chips in the Family signature card, on the same field metrics */
+    .card .chip {
+      height: 28px; padding: 0 12px; border-radius: 8px; gap: 8px;
+      font-size: 12px; line-height: 14px; color: var(--fig-num)
     }
 
     @media (hover: hover) {
