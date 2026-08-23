@@ -1538,6 +1538,86 @@
       .fbtn.solid:hover { background: var(--bg-active) }
       .side .navitem:hover { background: var(--fig-sel) }
     }
+  
+    /* ================= export code block — BoardUI docs code-card spec ================= */
+    :root {
+      --code-shell: #f7f7f7; --code-seg-bg: #f7f7f7; --code-seg-sel: #ffffff;
+      --code-surface: #ffffff; --code-tab: #737373; --code-tab-sel: #0a0a0a;
+      --code-icon: #737373; --code-hover: #ebebeb; --code-fg: #737373;
+      --code-name: rgb(0, 188, 125); --code-val: #737373; --code-punc: #a1a1a1;
+      --ease-out: cubic-bezier(0, 0, .2, 1);
+    }
+    :root.dark {
+      --code-shell: #141416; --code-seg-bg: #141416; --code-seg-sel: #2a2b2d;
+      --code-surface: #1a1b1c; --code-tab: #9d9ea1; --code-tab-sel: #eceded;
+      --code-icon: #9d9ea1; --code-hover: #2a2b2d; --code-fg: #9d9ea1;
+      --code-name: rgb(61, 220, 151); --code-val: #9d9ea1; --code-punc: #7e8083;
+    }
+
+    .code {
+      display: flex; flex-direction: column; gap: 2px; width: 100%;
+      padding: 8px; border: 0; border-radius: 24px; background: var(--code-shell);
+      box-shadow: none; overflow: visible
+    }
+    .code .ch {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      height: auto; padding: 0; background: none; border: 0; overflow: visible
+    }
+
+    /* segmented control with a sliding selection pill */
+    .code .seg {
+      position: relative; display: inline-flex; align-items: flex-start; flex-wrap: wrap;
+      gap: 2px; padding: 4px; border-radius: 10px; background: var(--code-seg-bg)
+    }
+    .code .seg .seg-pill {
+      position: absolute; left: 0; top: 0; border-radius: 6px;
+      background: var(--code-seg-sel); box-shadow: 0 1px rgb(0 0 0 / .05);
+      pointer-events: none; transition: none
+    }
+    .code .seg[data-ready="1"] .seg-pill {
+      transition: transform 200ms var(--ease-out), width 200ms var(--ease-out), height 200ms var(--ease-out)
+    }
+    .code .seg button {
+      position: relative; z-index: 1; display: inline-flex; align-items: center; justify-content: center;
+      height: auto; padding: 4px 10px; border-radius: 6px; white-space: nowrap;
+      font-family: var(--font-sans); font-size: 14px; line-height: 20px; font-weight: 500;
+      color: var(--code-tab); background: none; box-shadow: none;
+      transition: color 200ms var(--ease-out)
+    }
+    .code .seg button[aria-pressed="true"] { color: var(--code-tab-sel); background: none; box-shadow: none }
+
+    /* copy control — copy/check cross-fade */
+    .codecopy {
+      display: flex; align-items: center; justify-content: center; flex: none;
+      width: 28px; height: 28px; margin-right: 4px; border-radius: 10px;
+      color: var(--code-icon); transition: background 150ms var(--ease-out)
+    }
+    .codecopy .ic {
+      position: relative; display: inline-flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; flex: none
+    }
+    .codecopy .ic svg {
+      position: absolute; width: 20px; height: 20px;
+      transition: transform 200ms var(--ease-out), opacity 200ms var(--ease-out), filter 200ms var(--ease-out)
+    }
+    .codecopy .i-copy { transform: scale(1); opacity: 1; filter: blur(0) }
+    .codecopy .i-check { transform: scale(.75); opacity: 0; filter: blur(2px) }
+    .codecopy[data-done="1"] .i-copy { transform: scale(.75); opacity: 0; filter: blur(2px) }
+    .codecopy[data-done="1"] .i-check { transform: scale(1); opacity: 1; filter: blur(0) }
+
+    /* code surface */
+    .code-pad { padding: 4px }
+    .code pre {
+      margin: 0; padding: 12px 20px; border-radius: 12px; background: var(--code-surface);
+      box-shadow: 0 2px 0 0 rgb(0 0 0 / .03), 0 1px 2px 0 rgb(0 0 0 / .05), 0 6px 10px 0 rgb(0 0 0 / .02);
+      font-family: var(--font-mono); font-size: 14px; line-height: 20px;
+      white-space: pre; tab-size: 2; overflow: auto; max-height: 420px; color: var(--code-fg)
+    }
+    .code pre .kw, :root.dark .code pre .kw { color: var(--code-name) }
+    .code pre .st { color: var(--code-val) }
+    .code pre .cm { color: var(--code-punc) }
+
+    @media (hover: hover) { .codecopy:hover { background: var(--code-hover) } }
   </style>
 </head>
 
@@ -1783,20 +1863,29 @@
               in the URL.</p>
             <div class="code">
               <div class="ch">
-                <div class="seg" id="segFmt" role="group" aria-label="Export format">
+                <div class="seg" id="segFmt" role="radiogroup" aria-label="Export format">
+                  <span class="seg-pill" aria-hidden="true"></span>
                   <button data-v="css">CSS</button><button data-v="tw">Tailwind v4</button><button
                     data-v="scss">SCSS</button>
                   <button data-v="json">JSON</button><button data-v="jsonn">JSON nested</button><button
                     data-v="dtcg">DTCG</button><button data-v="svg">SVG sheet</button>
                 </div>
-                <button class="iconbtn" id="btnCopyCode" aria-label="Copy export">
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <rect x="5.5" y="5.5" width="8" height="8" rx="2" />
-                    <path d="M10.5 3.5A2 2 0 0 0 8.5 2h-4a2 2 0 0 0-2 2v5c0 .8.5 1.5 1.2 1.8" />
-                  </svg>
+                <button class="codecopy" id="btnCopyCode" aria-label="Copy export">
+                  <span class="ic">
+                    <svg class="i-copy" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                      aria-hidden="true">
+                      <path d="M6.9998 6V3C6.9998 2.44772 7.44752 2 7.9998 2H19.9998C20.5521 2 20.9998 2.44772 20.9998 3V17C20.9998 17.5523 20.5521 18 19.9998 18H16.9998V20.9991C16.9998 21.5519 16.5499 22 15.993 22H4.00666C3.45059 22 3 21.5554 3 20.9991L3.0026 7.00087C3.0027 6.44811 3.45264 6 4.00942 6H6.9998ZM5.00242 8L5.00019 20H14.9998V8H5.00242ZM8.9998 6H16.9998V16H18.9998V4H8.9998V6Z" />
+                    </svg>
+                    <svg class="i-check" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" fill="currentColor"
+                      aria-hidden="true">
+                      <path d="M9.9997 15.1709L19.1921 5.97852L20.6063 7.39273L9.9997 17.9993L3.63574 11.6354L5.04996 10.2212L9.9997 15.1709Z" />
+                    </svg>
+                  </span>
                 </button>
               </div>
-              <pre id="codeOut"><code></code></pre>
+              <div class="code-pad">
+                <pre id="codeOut"><code></code></pre>
+              </div>
             </div>
             <div class="row" style="margin-top:12px; gap:8px; flex-wrap:wrap">
               <button class="btn sec" id="btnP3">Include P3 upgrade block</button>
@@ -2787,6 +2876,18 @@
         .replace(/(--[a-z0-9\-]+|@[a-z\-]+|\$[a-z0-9\-]+|"\$?[a-z\-]+")/gi, '<span class="kw">$1</span>')
         .replace(/(#[0-9a-f]{6}|oklch\([^)]*\)|color\(display-p3[^)]*\))/gi, '<span class="st">$1</span>');
     }
+    function syncSegPill() {
+      const seg = $('#segFmt'); if (!seg) return;
+      const pill = seg.querySelector('.seg-pill');
+      const sel = seg.querySelector('button[aria-pressed="true"]');
+      if (!pill || !sel) return;
+      pill.style.width = sel.offsetWidth + 'px';
+      pill.style.height = sel.offsetHeight + 'px';
+      pill.style.transform = 'translate(' + sel.offsetLeft + 'px, ' + sel.offsetTop + 'px)';
+      // first placement lands without animating in from the corner
+      if (seg.dataset.ready !== '1') requestAnimationFrame(() => { seg.dataset.ready = '1'; });
+    }
+    addEventListener('resize', syncSegPill);
     function renderExport() {
       $('#segFmt').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === S.fmt)));
       $('#btnP3').setAttribute('aria-pressed', String(!!S.p3));
@@ -2795,6 +2896,7 @@
       $('#codeOut').innerHTML = '<code>' + highlight(txt, S.fmt) + '</code>';
       $('#codeOut').dataset.raw = '';
       renderExport.raw = txt;
+      syncSegPill();
     }
 
     /* ========================= 10. inspector ========================= */
@@ -2967,7 +3069,13 @@
     $('#btnSigReset').addEventListener('click', () => { S.intensity = null; S.lift = null; render(); toast('Signature reset to the extracted values'); });
     $('#btnShare').addEventListener('click', shareLink);
     $('#btnShare2').addEventListener('click', shareLink);
-    $('#btnCopyCode').addEventListener('click', () => copy(renderExport.raw || exportText(S.fmt), 'Export'));
+    $('#btnCopyCode').addEventListener('click', () => {
+      copy(renderExport.raw || exportText(S.fmt), 'Export');
+      const b = $('#btnCopyCode');
+      b.dataset.done = '1';
+      clearTimeout(b._doneT);
+      b._doneT = setTimeout(() => { b.dataset.done = '0'; }, 1400);
+    });
     $('#btnP3').addEventListener('click', () => { S.p3 = !S.p3; renderExport(); persist(); });
     $('#btnSave').addEventListener('click', () => {
       let list = []; try { list = JSON.parse(localStorage.getItem('csg.saved') || '[]'); } catch (e) { }
