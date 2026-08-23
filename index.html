@@ -218,7 +218,7 @@
     }
 
     .sm {
-      font-size: 13.5px;
+      font-size: 15px;
       line-height: 1.6;
       text-wrap: pretty
     }
@@ -1267,7 +1267,7 @@
 
     .grid2 {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 16px
     }
 
@@ -1638,6 +1638,66 @@
     .code pre .cm { color: var(--code-punc) }
 
     @media (hover: hover) { .codecopy:hover { background: var(--code-hover) } }
+  
+    /* long-form body copy */
+    .prose p + p { margin-top: 16px }
+    .prose strong { font-weight: 600; color: var(--text-primary) }
+    .prose code {
+      font-family: var(--font-mono); font-size: .9em; padding: 2px 6px; border-radius: 6px;
+      background: var(--bg-subtle); color: var(--text-primary);
+      font-variant-numeric: tabular-nums; white-space: nowrap
+    }
+  
+    /* "On this page" rail */
+    .toc {
+      display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none;
+      border-left: 1px solid var(--fig-rule)
+    }
+    .toc li { display: flex }
+    .toc-rail .toc a {
+      margin-left: -1px; border-left: 2px solid transparent; padding: 6px 0 6px 16px;
+      font-family: var(--font-sans); font-size: 14px; line-height: 20px; font-weight: 500;
+      color: var(--fig-label); text-decoration: none; cursor: pointer;
+      transition: color 150ms var(--ease-out), border-color 150ms var(--ease-out)
+    }
+    .toc-rail .toc a[aria-current="location"] {
+      border-left-color: var(--fig-value); color: var(--fig-value)
+    }
+    @media (hover: hover) {
+      .toc-rail .toc a:hover { color: var(--fig-muted); text-decoration: none }
+      .toc-rail .toc a[aria-current="location"]:hover { color: var(--fig-value) }
+    }
+  
+    /* content column + "On this page" rail, centred as one group */
+    main { gap: 40px; align-items: flex-start }
+    .col { min-width: 0; max-width: 760px }
+    .toc-rail {
+      width: 220px; flex: none; position: sticky; top: 72px; align-self: flex-start;
+      display: flex; flex-direction: column; gap: 16px
+    }
+    .toc-head {
+      display: flex; align-items: center; gap: 8px; font-family: var(--font-sans);
+      font-size: 14px; line-height: 20px; font-weight: 600; color: var(--text-primary)
+    }
+    .toc-head svg { flex: none; color: var(--fig-muted) }
+    /* below this the centre track cannot carry both the column and the rail */
+    @media (max-width: 1599px) { .toc-rail { display: none } }
+  
+    /* the light/dark pair is inherently wider than the column — scroll it
+       rather than let it overflow and slide under the "On this page" rail */
+    .ldscroll {
+      overflow-x: auto; overscroll-behavior-x: contain; padding-bottom: 6px;
+      scrollbar-width: thin; scrollbar-color: var(--border-strong) transparent
+    }
+    .ldscroll > .grid2 { min-width: 1300px }
+    .ldscroll::-webkit-scrollbar { height: 8px }
+    .ldscroll::-webkit-scrollbar-track { background: transparent }
+    .ldscroll::-webkit-scrollbar-thumb {
+      background: var(--border-strong); border-radius: 8px;
+      border: 2px solid transparent; background-clip: padding-box
+    }
+    .ldscroll::-webkit-scrollbar-thumb:hover { background: var(--text-muted) }
+    @media (max-width: 899px) { .ldscroll > .grid2 { min-width: 660px } }
   </style>
 </head>
 
@@ -1741,11 +1801,44 @@
       <main>
         <div class="col">
           <h1>Color system</h1>
-          <p class="sm sec" style="margin-top:8px; max-width:68ch">One brand color, read as a structural signature,
+          <p class="sm sec" style="margin-top:8px">One brand color, read as a structural signature,
             reissued across every semantic hue. Intensity is held as a share of each hue’s gamut ceiling, so the family
             stays consistent where absolute chroma cannot.</p>
 
-          <section class="blk" id="s-signature" style="margin-top:40px">
+          <section class="blk" id="s-how" style="margin-top:40px">
+            <h2>How the system works</h2>
+            <div class="prose sm sec" style="margin-top:8px">
+              <p>Everything on this page derives from a single input. The color you paste is read not as a value but as
+                a <strong>signature</strong> — three properties measured in OKLCH: its lightness, its
+                <strong>intensity</strong> (chroma expressed as a share of the most that hue can hold at that
+                lightness), and its <strong>lift</strong> (how far it sits from the lightness its hue reaches most
+                cleanly). Those three numbers, not the hex, are what every other ramp inherits.</p>
+              <p>Holding intensity as a <em>ratio</em> rather than an absolute is what makes the family read as one
+                system. Yellow can carry far more chroma than blue at the same lightness, so a fixed
+                <code>C 0.15</code> leaves one washed out and the other overdriven, while the same
+                <em>share of ceiling</em> makes them siblings. Every value is gamut-checked against sRGB before it is
+                emitted, so nothing silently clips.</p>
+              <p>Each role — brand, error, warning, success, info, tinted neutrals, and any number of accents — sits at
+                its own anchor hue and expands across an eleven-stop lightness ladder, <code>50</code> through
+                <code>950</code>. Semantic hues are pulled toward the brand only when they fall within 90° of it; a role
+                roughly opposite the brand is left where it is, because dragging it across the wheel produces a color
+                that is neither harmonious nor still recognisable as <em>error</em>. Any stop can be locked to hold an
+                exact value, and its neighbours re-smooth around it.</p>
+              <p>Three corrections then run on every regeneration. Roles that land within <code>ΔEOK 0.10</code> of each
+                other are rotated apart until they are perceptually distinct. Error and success are re-checked under
+                simulated deuteranopia and separated in lightness if they collide there rather than only in full colour.
+                And each role’s <code>600</code> stop walks darker until it clears <code>4.5:1</code> against its own
+                <code>50</code>. Every intervention is reported inline, with how far it moved and why.</p>
+              <p>The dark set is generated, not inverted: the ladder is remapped so the darkest stops become surfaces,
+                chroma comes down at high lightness where saturated light text vibrates, and the neutral tint leans
+                further toward the brand. Everything exports from live state — CSS custom properties with an
+                <code>oklch()</code> upgrade block and optional Display-P3, Tailwind v4 <code>@theme</code>, SCSS maps,
+                flat and nested JSON, <code>DTCG</code> tokens, and an SVG swatch sheet — and the whole system encodes
+                into the URL, so a link reproduces it exactly.</p>
+            </div>
+          </section>
+
+          <section class="blk" id="s-signature">
             <h2>Family signature</h2>
             <p class="sm sec">Five properties extracted from the brand color. Every ramp in the system inherits them.
             </p>
@@ -1825,7 +1918,9 @@
             <p class="sm sec">The dark set is generated, not inverted: the ladder is remapped so the darkest stops
               become surfaces, chroma comes down at high lightness where saturated light text vibrates, and the neutral
               tint leans further toward the brand.</p>
-            <div class="grid2" id="ldPair"></div>
+            <div class="ldscroll">
+              <div class="grid2" id="ldPair"></div>
+            </div>
           </section>
 
           <section class="blk" id="s-preview">
@@ -1915,6 +2010,19 @@
 
           <p class="cap mut mono" id="mathTest" style="margin-top:-24px"></p>
         </div>
+          <aside class="toc-rail" aria-label="On this page">
+            <div class="toc-head">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
+                aria-hidden="true">
+                <path d="M6 3.5h8M6 8h8M6 12.5h8" />
+                <circle cx="2.9" cy="3.5" r=".95" fill="currentColor" stroke="none" />
+                <circle cx="2.9" cy="8" r=".95" fill="currentColor" stroke="none" />
+                <circle cx="2.9" cy="12.5" r=".95" fill="currentColor" stroke="none" />
+              </svg>
+              <span>On this page</span>
+            </div>
+            <ul class="toc" id="toc"></ul>
+          </aside>
       </main>
     </div>
 
@@ -3259,6 +3367,44 @@
       }));
     });
 
+    /* "On this page" rail — built from the sections themselves so it stays in
+       sync, and scrolled programmatically because the URL hash carries state */
+    function buildToc() {
+      const ul = $('#toc'); if (!ul) return;
+      ul.innerHTML = '';
+      document.querySelectorAll('main section.blk[id]').forEach(sec => {
+        const h2 = sec.querySelector('h2'); if (!h2) return;
+        const a = el('a', {
+          href: '#' + sec.id, 'data-sec': sec.id, text: h2.textContent.trim(),
+          onclick: e => {
+            e.preventDefault();
+            const y = sec.getBoundingClientRect().top + window.scrollY - 72;
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          }
+        });
+        ul.append(el('li', {}, [a]));
+      });
+      syncToc();
+    }
+    function syncToc() {
+      const links = $('#toc') ? [...$('#toc').querySelectorAll('a')] : [];
+      if (!links.length) return;
+      const y = window.scrollY + 120;
+      let active = links[0];
+      links.forEach(a => {
+        const sec = document.getElementById(a.dataset.sec);
+        if (sec && sec.getBoundingClientRect().top + window.scrollY <= y) active = a;
+      });
+      // the last section can sit closer to the bottom than the 120px threshold,
+      // so at the end of the document always claim it
+      if (window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4)
+        active = links[links.length - 1];
+      links.forEach(a => a === active
+        ? a.setAttribute('aria-current', 'location')
+        : a.removeAttribute('aria-current'));
+    }
+    addEventListener('scroll', syncToc, { passive: true });
+
     /* inspector collapse on narrow viewports */
     const inspToggle = $('#inspToggle');
     let narrowSeen = false;
@@ -3274,6 +3420,7 @@
     /* ========================= 13. boot + math self-test ========================= */
     loadState();
     document.querySelectorAll('[data-fig]').forEach(n => { n.outerHTML = FIG[n.dataset.fig] || ''; });
+    buildToc();
     applyTheme(); applyCvd(); checkNarrow();
     render();
 
