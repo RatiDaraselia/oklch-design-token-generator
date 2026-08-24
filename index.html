@@ -69,7 +69,7 @@
 
     :root.dark {
       --bg-page: #0d0d0e;
-      --bg-panel: w#141416;
+      --bg-panel: #141416;
       --bg-surface: #1a1b1c;
       --bg-subtle: #212224;
       --bg-hover: #2a2b2d;
@@ -1390,7 +1390,7 @@
   
     /* ================= sidebar panels — Figma redesign (1:5034 / 1:4814) ================= */
     :root {
-      --fig-panel: #f7f7f7; --fig-field: #ffffff; --fig-border: #eaeaea; --fig-rule: #ebebeb;
+      --fig-panel: #ffffff; --fig-field: #ffffff; --fig-border: #eaeaea; --fig-rule: #ebebeb;
       --fig-label: #a1a1a1; --fig-text: #3d3d3d; --fig-muted: #737373; --fig-value: #1b1b1b;
       --fig-dim: #808080; --fig-foot: #9e9e9e; --fig-num: #636363; --fig-sel: #f0f0f0;
       --fig-tree: #dbdbdb; --fig-fill: #ebebeb;
@@ -1429,7 +1429,7 @@
       width: 24px; height: 24px; border-radius: 4px; border: 0;
       box-shadow: inset 0 0 0 1px var(--swatch-ring)
     }
-    .side .brandfield input { height: 38px; font-family: var(--font-mono); font-size: 13px; color: var(--fig-value) }
+    .side .brandfield input { height: 38px; font-family: var(--font-mono); font-size: 13px; line-height: 13px; color: var(--fig-value) }
     .side #bfmt {
       font-family: var(--font-mono); font-size: 12px; line-height: 12px;
       text-transform: uppercase; color: var(--fig-dim)
@@ -1440,7 +1440,7 @@
       display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
       height: 32px; padding: 0 12px; border: 1px solid var(--fig-border); border-radius: 8px;
       background: transparent; color: var(--fig-text); font-family: var(--font-sans);
-      font-size: 13px; line-height: 16px; font-weight: 500; letter-spacing: -.26px;
+      font-size: 13px; line-height: 13px; font-weight: 500; letter-spacing: -.26px;
       transition: background var(--fast), border-color var(--fast)
     }
     .fbtn svg { flex: none; display: block }
@@ -1457,16 +1457,16 @@
     }
     .side .sigread div:last-child, .insp .sigread div:last-child { border-bottom: 0 }
     .side .sigread span:first-child, .insp .sigread span:first-child {
-      font-family: var(--font-sans); font-size: 12px; line-height: 16px; color: var(--fig-muted)
+      font-family: var(--font-sans); font-size: 12px; line-height: 12px; color: var(--fig-muted)
     }
     .side .sigread span:last-child, .insp .sigread span:last-child {
-      font-family: var(--font-mono); font-size: 12px; line-height: 16px; color: var(--fig-value)
+      font-family: var(--font-mono); font-size: 12px; line-height: 12px; color: var(--fig-value)
     }
 
     /* ramp navigation */
     .side .navitem {
       height: 36px; gap: 8px; padding: 0 8px 0 12px; border-radius: 8px; width: 100%;
-      font-family: var(--font-sans); font-size: 13px; line-height: 16px; font-weight: 500;
+      font-family: var(--font-sans); font-size: 13px; line-height: 13px; font-weight: 500;
       color: var(--fig-muted); position: relative
     }
     .side .navitem .dot {
