@@ -1479,17 +1479,21 @@
 
     /* nested tree connector — reproduces the elbow paths from the design, but scales
        with the item count (accent groups vary from 2 to N depending on the scheme) */
-    .side .nested { margin: 0; padding-left: 13px; border-left: 0; width: 100% }
+    .side .nested { margin: 0; padding-left: 13px; border-left: 0; width: 100%; position: relative }
     .side .nested .navitem { border-radius: 10px }
+    /* one uninterrupted trunk, ending at the last row's centre. Drawing it per
+       row instead left a gap wherever the elbow's arc curved away from x=0. */
+    .side .nested::before {
+      content: ""; position: absolute; left: 2px; top: 0; bottom: 18px;
+      border-left: 1px solid var(--fig-tree); pointer-events: none
+    }
+    /* each row branches off the trunk with just the arc + its horizontal run */
     .side .nested .navitem::before {
-      content: ""; position: absolute; left: -11px; top: 0; width: 11px; height: 18px;
+      content: ""; position: absolute; left: -11px; top: 12px; width: 11px; height: 6px;
       border-left: 1px solid var(--fig-tree); border-bottom: 1px solid var(--fig-tree);
       border-radius: 0 0 0 6px; background: none; pointer-events: none
     }
-    .side .nested .navitem:not(:last-child)::after {
-      content: ""; position: absolute; left: -11px; top: 18px; bottom: 0;
-      border-left: 1px solid var(--fig-tree); pointer-events: none
-    }
+    .side .nested .navitem::after { content: none }
     .sb-empty {
       font-family: var(--font-sans); font-size: 12px; line-height: 1;
       text-transform: lowercase; color: var(--fig-dim); margin: 0
