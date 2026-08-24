@@ -58,7 +58,7 @@
       --border-strong: var(--n200);
       --ring: rgb(44 128 246 / .35);
       --shadow: 0 1px 2px rgb(0 0 0 / .04), 0 8px 24px rgb(0 0 0 / .08);
-      --shadow-lg: 0 0 0 1px rgb(0 0 0 / .06), 0 1px 1px -.5px rgb(0 0 0 / .06), 0 3px 3px -1.5px rgb(0 0 0 / .06), 0 6px 6px -3px rgb(0 0 0 / .06), 0 12px 12px -6px rgb(0 0 0 / .06), 0 24px 24px -12px rgb(0 0 0 / .06);
+      --shadow-lg: 0 0 0 0.5px rgb(0 0 0 / .08), 0 1px 1px -.5px rgb(0 0 0 / .06), 0 3px 3px -1.5px rgb(0 0 0 / .04), 0 6px 6px -3px rgb(0 0 0 / .02);
       --swatch-ring: transparent;
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
@@ -1390,7 +1390,7 @@
   
     /* ================= sidebar panels — Figma redesign (1:5034 / 1:4814) ================= */
     :root {
-      --fig-panel: #ffffff; --fig-field: #ffffff; --fig-border: #eaeaea; --fig-rule: #ebebeb;
+      --fig-panel: #f8f8f8; --fig-field: #ffffff; --fig-border: #eaeaea; --fig-rule: #ebebeb;
       --fig-label: #a1a1a1; --fig-text: #3d3d3d; --fig-muted: #737373; --fig-value: #1b1b1b;
       --fig-dim: #808080; --fig-foot: #9e9e9e; --fig-num: #636363; --fig-sel: #f0f0f0;
       --fig-tree: #dbdbdb; --fig-fill: #ebebeb;
@@ -1438,21 +1438,22 @@
     /* buttons */
     .fbtn {
       display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
-      height: 32px; padding: 0 12px; border: 1px solid var(--fig-border); border-radius: 8px;
-      background: transparent; color: var(--fig-text); font-family: var(--font-sans);
+      height: 32px; padding: 0 12px; border: 0; border-radius: 8px;
+      background: var(--bg-surface); color: var(--fig-text); font-family: var(--font-sans);
       font-size: 13px; line-height: 13px; font-weight: 500; letter-spacing: -.26px;
-      transition: background var(--fast), border-color var(--fast)
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 1px 1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+      transition: background var(--fast), box-shadow var(--fast)
     }
     .fbtn svg { flex: none; display: block }
     .fbtn.tall { height: 40px }
-    .fbtn.lead { justify-content: flex-start }
-    .fbtn.solid { background: var(--fig-fill); border-color: transparent }
+    .fbtn.lead { justify-content: center; padding-left: 8px; padding-right: 12px; }
+    .fbtn.solid { background: var(--fig-fill); box-shadow: none; }
     .fbtn.half { width: auto; flex: 1; min-width: 0 }
 
     /* readout rows — shared by Family signature and the inspector Readouts */
     .side .sigread, .insp .sigread { display: block; margin: 0 }
     .side .sigread div, .insp .sigread div {
-      height: 40px; padding: 8px 0; gap: 12px; border-bottom: 1px solid var(--fig-rule);
+      height: 40px; padding: 8px 4px; gap: 12px; border-bottom: 1px solid var(--fig-rule);
       display: flex; align-items: center; justify-content: space-between
     }
     .side .sigread div:last-child, .insp .sigread div:last-child { border-bottom: 0 }
@@ -1702,6 +1703,48 @@
     }
     .ldscroll::-webkit-scrollbar-thumb:hover { background: var(--text-muted) }
     @media (max-width: 899px) { .ldscroll > .grid2 { min-width: 660px } }
+  
+    /* ================= boxicons sizing + theme toggle ================= */
+    .iconbtn > span { display: flex }
+    .iconbtn svg { width: 18px; height: 18px; display: block }
+    .iconbtn:active { transform: scale(.92) }
+    .iconbtn.del svg { width: 16px; height: 16px }
+    .dis .mk { display: flex }
+    .dis .mk svg { width: 12px; height: 12px; display: block }
+    .toc-head > span { display: flex; flex: none; color: var(--fig-muted) }
+    .toc-head svg { width: 16px; height: 16px; display: block }
+
+    /* moon while light is active, sun while dark is — they cross-fade on the
+       same scale/opacity/blur curve as the export copy button, plus a quarter
+       turn so the swap reads as one motion rather than two */
+    .themeicon { position: relative; display: block; width: 18px; height: 18px }
+    .themeicon > span { position: absolute; inset: 0; display: flex }
+    .themeicon > span {
+      transition: transform 320ms var(--ease-out), opacity 320ms var(--ease-out),
+                  filter 320ms var(--ease-out)
+    }
+    .themebtn .i-moon { transform: none; opacity: 1; filter: blur(0) }
+    .themebtn .i-sun { transform: rotate(-90deg) scale(.6); opacity: 0; filter: blur(2px) }
+    .themebtn[aria-pressed="true"] .i-moon { transform: rotate(90deg) scale(.6); opacity: 0; filter: blur(2px) }
+    .themebtn[aria-pressed="true"] .i-sun { transform: none; opacity: 1; filter: blur(0) }
+    /* the toggle reports state through its icon, so it should not also latch */
+    .themebtn[aria-pressed="true"] { background: none; color: var(--text-secondary) }
+    @media (hover: hover) {
+      .themebtn[aria-pressed="true"]:hover { background: var(--bg-hover); color: var(--text-primary) }
+    }
+
+    /* theme change: chrome surfaces ease across, generated swatches snap so the
+       ramps never smear through intermediate colours */
+    html.theming body,
+    html.theming .hdr, html.theming .side, html.theming .insp,
+    html.theming .card, html.theming .pv, html.theming .code, html.theming .code pre,
+    html.theming .code .ch, html.theming .brandfield, html.theming .fbtn,
+    html.theming .toc, html.theming .toc a, html.theming .sigread div,
+    html.theming .sl .top input, html.theming .sl .track, html.theming .sl .thumb,
+    html.theming .prose code, html.theming hr {
+      transition: background-color 320ms var(--ease-out), border-color 320ms var(--ease-out),
+                  color 320ms var(--ease-out) !important
+    }
   </style>
 </head>
 
@@ -1766,40 +1809,22 @@
 
     <div class="center">
       <header class="hdr">
-        <button class="iconbtn hamb" id="hamb" aria-label="Toggle sidebar">
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-            <path d="M2 4h12M2 8h12M2 12h12" />
-          </svg>
-        </button>
+        <button class="iconbtn hamb" id="hamb" aria-label="Toggle sidebar"><span data-bx="menu"></span></button>
         <div class="crumb"><span>Systems</span><span>/</span><b id="crumb">Untitled system</b></div>
         <div class="grow"></div>
         <div class="row" style="gap:4px">
-          <button class="iconbtn" id="btnCvd" aria-label="Color vision simulation" title="Color vision simulation">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M1 8s2.6-4.4 7-4.4S15 8 15 8s-2.6 4.4-7 4.4S1 8 1 8Z" />
-              <circle cx="8" cy="8" r="2" />
-            </svg>
+          <button class="iconbtn" id="btnCvd" aria-label="Color vision simulation"
+            title="Color vision simulation"><span data-bx="eye"></span></button>
+          <button class="iconbtn themebtn" id="btnTheme" aria-label="Toggle dark mode" title="Toggle dark mode">
+            <span class="themeicon">
+              <span class="i-moon" data-bx="moon"></span>
+              <span class="i-sun" data-bx="sun"></span>
+            </span>
           </button>
-          <button class="iconbtn" id="btnTheme" aria-label="Toggle dark mode" title="Toggle dark mode">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="8" cy="8" r="3.2" />
-              <path
-                d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3.2 3.2l1.1 1.1M11.7 11.7l1.1 1.1M12.8 3.2l-1.1 1.1M4.3 11.7l-1.1 1.1" />
-            </svg>
-          </button>
-          <button class="iconbtn" id="btnShare" aria-label="Copy share link" title="Copy share link">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="3.5" r="2" />
-              <circle cx="4" cy="8" r="2" />
-              <circle cx="12" cy="12.5" r="2" />
-              <path d="M10.2 4.5 5.8 6.9M5.8 9.1l4.4 2.4" />
-            </svg>
-          </button>
-          <button class="iconbtn" id="btnExport" aria-label="Go to export" title="Export">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M8 2v8m0 0 3-3m-3 3L5 7M2.5 12.5h11" />
-            </svg>
-          </button>
+          <button class="iconbtn" id="btnShare" aria-label="Copy share link"
+            title="Copy share link"><span data-bx="share"></span></button>
+          <button class="iconbtn" id="btnExport" aria-label="Go to export"
+            title="Export"><span data-bx="code"></span></button>
         </div>
       </header>
       <main>
@@ -1877,10 +1902,7 @@
             <div id="semRamps"></div>
             <div id="semNotes" style="margin-top:16px"></div>
             <details class="dis sub" id="disTune">
-              <summary><svg class="mk" width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor"
-                  stroke-width="1.5">
-                  <path d="M4 2.5 8 6l-4 3.5" />
-                </svg>Semantic tuning</summary>
+              <summary><span class="mk" data-bx="chevronRight"></span>Semantic tuning</summary>
               <div class="card">
                 <div class="grid2" id="tuneSliders"></div>
                 <hr>
@@ -2016,13 +2038,7 @@
         </div>
           <aside class="toc-rail" aria-label="On this page">
             <div class="toc-head">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"
-                aria-hidden="true">
-                <path d="M6 3.5h8M6 8h8M6 12.5h8" />
-                <circle cx="2.9" cy="3.5" r=".95" fill="currentColor" stroke="none" />
-                <circle cx="2.9" cy="8" r=".95" fill="currentColor" stroke="none" />
-                <circle cx="2.9" cy="12.5" r=".95" fill="currentColor" stroke="none" />
-              </svg>
+              <span data-bx="list"></span>
               <span>On this page</span>
             </div>
             <ul class="toc" id="toc"></ul>
@@ -2034,11 +2050,8 @@
       <div class="insp-scroll">
         <div class="between" style="margin-bottom:12px">
           <div class="eyebrow">Inspector</div>
-          <button class="iconbtn" id="inspToggle" aria-label="Collapse inspector" style="display:none">
-            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M4 6l4 4 4-4" />
-            </svg>
-          </button>
+          <button class="iconbtn" id="inspToggle" aria-label="Collapse inspector"
+            style="display:none"><span data-bx="chevronDown"></span></button>
         </div>
         <div id="inspBody" class="sb"></div>
       </div>
@@ -2470,6 +2483,25 @@
         () => toast('Copy blocked by the browser')).catch(() => { });
     }
     /* icons exported from the Figma redesign (boxicons + SVG Logos) */
+    /* boxicons, basic pack, from @boxicons/core — the vendored folder ships the
+       library source only (src/icons is generated at build time), so these come
+       from the same upstream its own generate-icons script reads */
+    const BX = {
+      menu: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M3 5H21V7H3z\"/><path d=\"M3 11H21V13H3z\"/><path d=\"M3 17H21V19H3z\"/></svg>",
+      eye: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6\"/><path d=\"M12 19c7.63 0 9.93-6.62 9.95-6.68.07-.21.07-.43 0-.63-.02-.07-2.32-6.68-9.95-6.68s-9.93 6.61-9.95 6.67c-.07.21-.07.43 0 .63.02.07 2.32 6.68 9.95 6.68Zm0-12c5.35 0 7.42 3.85 7.93 5-.5 1.16-2.58 5-7.93 5s-7.42-3.84-7.93-5c.5-1.16 2.58-5 7.93-5\"/></svg>",
+      moon: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"m12.2,22c4.53,0,8.45-2.91,9.76-7.24.11-.35.01-.74-.25-1-.26-.26-.64-.36-1-.25-.78.23-1.58.35-2.38.35-4.52,0-8.2-3.68-8.2-8.2,0-.8.12-1.6.35-2.38.11-.35.01-.74-.25-1s-.64-.36-1-.25C4.91,3.35,2,7.28,2,11.8c0,5.62,4.57,10.2,10.2,10.2ZM8.18,4.65c-.03.34-.05.68-.05,1.02,0,5.62,4.57,10.2,10.2,10.2.34,0,.68-.02,1.02-.05-1.42,2.56-4.12,4.18-7.15,4.18-4.52,0-8.2-3.68-8.2-8.2,0-3.03,1.63-5.73,4.18-7.15Z\"/></svg>",
+      sun: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M12 17.01c2.76 0 5.01-2.25 5.01-5.01S14.76 6.99 12 6.99 6.99 9.24 6.99 12s2.25 5.01 5.01 5.01M12 9c1.66 0 3.01 1.35 3.01 3.01s-1.35 3.01-3.01 3.01-3.01-1.35-3.01-3.01S10.34 9 12 9M13 19h-2v3h2v-3M13 2h-2v3h2V2M2 11h3v2H2zM19 11h3v2h-3zM4.22 18.36l.71.71.71.71 1.06-1.06 1.06-1.06-.71-.71-.71-.71-1.06 1.06zM19.78 5.64l-.71-.71-.71-.71-1.06 1.06-1.06 1.06.71.71.71.71 1.06-1.06zM7.76 6.34 6.7 5.28 5.64 4.22l-.71.71-.71.71L5.28 6.7l1.06 1.06.71-.71zM16.24 17.66l1.06 1.06 1.06 1.06.71-.71.71-.71-1.06-1.06-1.06-1.06-.71.71z\"/></svg>",
+      share: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M5.5 15.5c1.07 0 2.02-.5 2.67-1.26l6.87 3.87c-.01.13-.04.26-.04.39 0 1.93 1.57 3.5 3.5 3.5s3.5-1.57 3.5-3.5-1.57-3.5-3.5-3.5c-1.07 0-2.02.5-2.67 1.26l-6.87-3.87c.01-.13.04-.26.04-.39s-.02-.26-.04-.39l6.87-3.87C16.47 8.5 17.42 9 18.5 9 20.43 9 22 7.43 22 5.5S20.43 2 18.5 2 15 3.57 15 5.5c0 .13.02.26.04.39L8.17 9.76A3.48 3.48 0 0 0 5.5 8.5C3.57 8.5 2 10.07 2 12s1.57 3.5 3.5 3.5m13 1.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5-1.5-.67-1.5-1.5.67-1.5 1.5-1.5m0-13c.83 0 1.5.67 1.5 1.5S19.33 7 18.5 7 17 6.33 17 5.5 17.67 4 18.5 4m-13 6.5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5S4 12.83 4 12s.67-1.5 1.5-1.5\"/></svg>",
+      code: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M9.71 16.29 5.41 12l4.3-4.29-1.42-1.42L2.59 12l5.7 5.71zM15.71 17.71l5.7-5.71-5.7-5.71-1.42 1.42 4.3 4.29-4.3 4.29z\"/></svg>",
+      chevronDown: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"m12 15.41 5.71-5.7-1.42-1.42-4.29 4.3-4.29-4.3-1.42 1.42z\"/></svg>",
+      chevronRight: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"m9.71 17.71 5.7-5.71-5.7-5.71-1.42 1.42 4.3 4.29-4.3 4.29z\"/></svg>",
+      list: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M8 11H21V13H8z\"/><path d=\"M8 6H21V8H8z\"/><path d=\"M8 16H21V18H8z\"/><path d=\"M3 5.5H6V8.5H3z\"/><path d=\"M3 10.5H6V13.5H3z\"/><path d=\"M3 15.5H6V18.5H3z\"/></svg>",
+      lock: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M6 22h12c1.1 0 2-.9 2-2v-9c0-1.1-.9-2-2-2h-1V7c0-2.76-2.24-5-5-5S7 4.24 7 7v2H6c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2M9 7c0-1.65 1.35-3 3-3s3 1.35 3 3v2H9zm-3 4h12v9H6z\"/></svg>",
+      lockOpen: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M6 22h12c1.1 0 2-.9 2-2v-9c0-1.1-.9-2-2-2H9V7c0-1.65 1.35-3 3-3s3 1.35 3 3h2c0-2.76-2.24-5-5-5S7 4.24 7 7v2H6c-1.1 0-2 .9-2 2v9c0 1.1.9 2 2 2m0-11h12v9H6z\"/></svg>",
+      copy: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M20 2H10c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2m0 12H10V4h10z\"/><path d=\"M14 20H4V10h2V8H4c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2v-2h-2z\"/></svg>",
+      info: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M11 11h2v6h-2zM11 7h2v2h-2z\"/><path d=\"M12 22c5.51 0 10-4.49 10-10S17.51 2 12 2 2 6.49 2 12s4.49 10 10 10m0-18c4.41 0 8 3.59 8 8s-3.59 8-8 8-8-3.59-8-8 3.59-8 8-8\"/></svg>",
+      x: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"m7.76 14.83-2.83 2.83 1.41 1.41 2.83-2.83 2.12-2.12.71-.71.71.71 1.41 1.42 3.54 3.53 1.41-1.41-3.53-3.54-1.42-1.41-.71-.71 5.66-5.66-1.41-1.41L12 10.59 6.34 4.93 4.93 6.34 10.59 12l-.71.71z\"/></svg>"
+    };
     const FIG = {
       pickScreen: "<svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><g id=\"Frame\"> <path id=\"Vector\" d=\"M2.66676 10.5067L2.00009 13.1733C1.9763 13.2605 1.97047 13.3516 1.98297 13.4411C1.99547 13.5306 2.02603 13.6166 2.07279 13.6939C2.11955 13.7712 2.18154 13.8382 2.255 13.8908C2.32845 13.9435 2.41184 13.9806 2.50009 14C2.60729 14.0271 2.71955 14.0271 2.82676 14L5.49342 13.3333C5.61172 13.3052 5.72007 13.2453 5.80676 13.16L11.3334 7.60667L12.1934 8.47334L13.1401 7.52667L12.2734 6.66667L14.0001 4.94C14.2484 4.69018 14.3878 4.35225 14.3878 4C14.3878 3.64775 14.2484 3.30982 14.0001 3.06L12.9401 2C12.6903 1.75167 12.3523 1.61228 12.0001 1.61228C11.6478 1.61228 11.3099 1.75167 11.0601 2L9.33342 3.72667L8.46676 2.86L7.52009 3.80667L8.38676 4.66667L2.86009 10.1933C2.76751 10.2776 2.70051 10.3861 2.66676 10.5067ZM3.91342 11.0067L9.33342 5.61334L10.3868 6.66667L4.99342 12.0667L3.58009 12.42L3.91342 11.0067Z\" fill=\"currentColor\"/> </g></svg>",
       pickImage: "<svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><g id=\"Frame\"> <path id=\"Vector\" d=\"M12.6667 2H3.33333C2.598 2 2 2.598 2 3.33333V12.6667C2 13.402 2.598 14 3.33333 14H12.6667C13.402 14 14 13.402 14 12.6667V3.33333C14 2.598 13.402 2 12.6667 2ZM3.33333 12.6667V3.33333H12.6667L12.668 12.6667H3.33333Z\" fill=\"currentColor\"/> <path id=\"Vector_2\" d=\"M6.66667 9.33333L6 8.66667L4 11.3333H12L8.66667 6.66667L6.66667 9.33333Z\" fill=\"currentColor\"/> </g></svg>",
@@ -2483,10 +2515,10 @@
       dtcg: "<svg width=\"16\" height=\"17.9382\" viewBox=\"0 0 16 17.9382\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><g id=\"Group 5\"> <path id=\"Vector\" opacity=\"0.25\" d=\"M0.428571 4.68411L8 0.398397V4.54125L5.14286 5.68411L3.71429 8.54125L4.28571 11.1127L0.428571 13.2555V4.68411Z\" fill=\"#2B5CF2\"/> <path id=\"Vector_2\" opacity=\"0.5\" d=\"M15.7143 4.54125L8 0.25554V4.54125L11.1429 5.82697L12.2857 8.54125L11.7143 11.1127L15.7143 13.2555V4.54125Z\" fill=\"#2B5CF2\"/> <path id=\"Vector_3\" opacity=\"0.75\" d=\"M8 17.6841L0.428571 13.3984L4.14286 11.2555L5.85714 12.6841L8 13.3984L10.1429 12.6841L11.8571 11.2555L15.5714 13.3984L8 17.6841Z\" fill=\"#2B5CF2\"/> <path id=\"Vector_4\" d=\"M7.71429 0.0362571C7.90154 -0.0120857 8.09846 -0.0120857 8.28571 0.0362571C8.38286 0.0613429 8.47754 0.100085 8.56697 0.151228L15.4241 4.06917C15.5153 4.12129 15.5972 4.18511 15.6691 4.2578H15.6697C15.6744 4.2626 15.6789 4.26797 15.6836 4.27283C15.8835 4.48266 15.9999 4.76403 16 5.06191V12.8777C15.9999 13.2878 15.7801 13.6671 15.4241 13.8705L8.56697 17.7885C8.47766 17.8395 8.38274 17.8761 8.28571 17.9012V17.9023C8.25269 17.9108 8.21931 17.9175 8.18583 17.9229C8.17766 17.9243 8.16943 17.9252 8.16126 17.9263C8.12509 17.9315 8.08886 17.9352 8.05246 17.9369C8.0428 17.9373 8.03314 17.9379 8.02343 17.938C7.98714 17.9388 7.95086 17.9374 7.91463 17.9347C7.90343 17.9339 7.89229 17.9331 7.88114 17.9319C7.84634 17.9283 7.81177 17.9231 7.77737 17.9163C7.76463 17.9137 7.75206 17.9109 7.73937 17.9079C7.73109 17.906 7.72257 17.9045 7.71429 17.9023V17.9007C7.64126 17.8818 7.56903 17.8578 7.5 17.8242L7.43303 17.7885L0.575885 13.8705C0.219885 13.6671 5.71429e-05 13.2878 0 12.8777V5.06191C0 4.9558 0.0149709 4.85168 0.0429709 4.7522C0.0441709 4.74791 0.0456004 4.74368 0.0468576 4.7394C0.0516576 4.72306 0.0569713 4.70689 0.0625142 4.69083C0.0645713 4.68471 0.0664572 4.67849 0.0686286 4.67243C0.0733143 4.65946 0.0785712 4.64666 0.0837141 4.63391C0.0977141 4.59911 0.113257 4.565 0.130572 4.5318C0.134686 4.52391 0.139085 4.51614 0.143428 4.50837C0.161771 4.47506 0.181542 4.44254 0.203142 4.41123C0.207828 4.40443 0.2128 4.39786 0.217657 4.39117C0.240628 4.35934 0.265029 4.32849 0.291314 4.29906C0.355371 4.22746 0.428857 4.16357 0.510629 4.10934L0.575885 4.06917L7.43303 0.151228C7.52246 0.100085 7.61714 0.0613429 7.71429 0.0362571ZM0.863257 13.3767L7.71429 17.2907V13.5312C6.236 13.44 4.94851 12.647 4.18023 11.4804L0.863257 13.3767ZM11.8186 11.481C11.0503 12.6471 9.76366 13.4401 8.28571 13.5312V17.2907L15.1362 13.3767L11.8186 11.481ZM4.39286 7.23768C4.14074 7.76174 4 8.3494 4 8.96986C4 9.6474 4.16863 10.2856 4.46594 10.8448C4.50389 10.9161 4.54394 10.986 4.58594 11.0547C5.24211 12.1269 6.38897 12.8651 7.71429 12.9587V9.13557L4.39286 7.23768ZM8.28571 9.13557V12.9587C9.60863 12.8653 10.7534 12.1293 11.4102 11.0603C11.4647 10.9712 11.5154 10.8797 11.5631 10.7863C11.8415 10.241 12 9.62414 12 8.96986C12 8.34923 11.8583 7.76186 11.606 7.23768L8.28571 9.13557ZM0.571429 12.8845L3.89623 10.9844C3.59726 10.3765 3.42857 9.693 3.42857 8.96986C3.42857 8.2462 3.59686 7.56186 3.89623 6.95368L0.571429 5.05408V12.8845ZM12.1033 6.95368C12.4027 7.56191 12.5714 8.24608 12.5714 8.96986C12.5714 9.69306 12.4022 10.3764 12.1033 10.9844L15.428 12.8845C15.4281 12.8823 15.4286 12.8799 15.4286 12.8777V5.06191C15.4286 5.05934 15.4281 5.05666 15.428 5.05408L12.1033 6.95368ZM8 4.96986C7.90389 4.96986 7.80869 4.97431 7.71429 4.981C6.4488 5.07031 5.34572 5.74711 4.67743 6.74163L8 8.64003L11.322 6.74106C10.6038 5.67277 9.384 4.96986 8 4.96986ZM0.863257 4.56249L4.1808 6.45757C4.9492 5.2918 6.23657 4.49906 7.71429 4.40791V0.648428L0.863257 4.56249ZM8.28571 4.40791C9.76331 4.49906 11.0502 5.29191 11.8186 6.45757L15.1356 4.56249L8.28571 0.648428V4.40791Z\" fill=\"#2B5CF2\"/> </g></svg>"
     };
     const ICON = {
-      lock: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5.2a2.5 2.5 0 0 1 5 0V7"/></svg>',
-      unlock: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" opacity=".7"><rect x="3.5" y="7" width="9" height="6.5" rx="1.5"/><path d="M5.5 7V5.2a2.5 2.5 0 0 1 4.6-1.3"/></svg>',
-      copy: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5.5" y="5.5" width="8" height="8" rx="2"/><path d="M10.5 3.5A2 2 0 0 0 8.5 2h-4a2 2 0 0 0-2 2v5c0 .8.5 1.5 1.2 1.8"/></svg>',
-      info: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 7.2v4M8 5.2v.6"/></svg>'
+      get lock() { return BX.lock; },
+      get unlock() { return BX.lockOpen; },
+      get copy() { return BX.copy; },
+      get info() { return BX.info; }
     };
 
     /* ========================= 7. sliders ========================= */
@@ -2738,7 +2770,7 @@
         el('button', { class: 'navitem', style: 'flex:1', onclick: () => { S = Object.assign(JSON.parse(JSON.stringify(DEF)), it.state); render(); persist(); toast('Loaded ' + it.name); } },
           [el('span', { class: 'dot', style: 'background:' + it.hex }), el('span', { text: it.name })]),
         el('button', {
-          class: 'iconbtn', 'aria-label': 'Delete ' + it.name, text: '×', onclick: () => {
+          class: 'iconbtn del', 'aria-label': 'Delete ' + it.name, html: BX.x, onclick: () => {
             list.splice(i, 1); localStorage.setItem('csg.saved', JSON.stringify(list)); renderSaved();
           }
         })
@@ -3158,15 +3190,14 @@
       /* export */
       const expGrp = el('div', { class: 'sb-grp' }, [
         el('div', { class: 'eyebrow', text: 'Export' }),
-        el('div', { class: 'sb-grp g8 mid' }, [
-          el('div', { class: 'sb-grp g6' }, [
+        el('div', { class: 'sb-grp g6' }, [
+          el('div', { style: 'display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%' }, [
             fbtn('CSS', FIG.css, () => copy(exportText('css'), 'CSS'), 'tall lead'),
             fbtn('Tailwind', FIG.tailwind, () => copy(exportText('tw'), 'Tailwind theme'), 'tall lead'),
             fbtn('JSON', FIG.json, () => copy(exportText('json'), 'JSON'), 'tall lead'),
             fbtn('DTCG', FIG.dtcg, () => copy(exportText('dtcg'), 'DTCG tokens'), 'tall lead')
           ]),
-          el('div', { class: 'rule32' }),
-          fbtn('Share link', FIG.share, shareLink, 'tall lead')
+          fbtn('Share link', FIG.share, shareLink, 'tall')
         ])
       ]);
 
@@ -3244,17 +3275,25 @@
     $('#hamb').addEventListener('click', () => { const s = $('#side'); s.dataset.open = s.dataset.open === '1' ? '0' : '1'; });
 
     /* theme */
-    function applyTheme() {
+    function applyTheme(animate) {
       const root = document.documentElement;
-      root.classList.add('theme-swap');
       const dark = S.theme ? S.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      if (animate) {
+        // let the surfaces ease; held long enough to cover the 320ms transition
+        root.classList.add('theming');
+        clearTimeout(applyTheme._t);
+        applyTheme._t = setTimeout(() => root.classList.remove('theming'), 360);
+      } else {
+        // first paint restores a stored theme — swap it with nothing animating
+        root.classList.add('theme-swap');
+        requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove('theme-swap')));
+      }
       root.classList.toggle('dark', dark);
       $('#btnTheme').setAttribute('aria-pressed', String(dark));
-      requestAnimationFrame(() => requestAnimationFrame(() => root.classList.remove('theme-swap')));
     }
     $('#btnTheme').addEventListener('click', () => {
       S.theme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-      applyTheme(); persist();
+      applyTheme(true); persist();
     });
 
     /* cvd */
@@ -3424,6 +3463,11 @@
     /* ========================= 13. boot + math self-test ========================= */
     loadState();
     document.querySelectorAll('[data-fig]').forEach(n => { n.outerHTML = FIG[n.dataset.fig] || ''; });
+    document.querySelectorAll('[data-bx]').forEach(n => {
+      const svg = BX[n.dataset.bx]; if (!svg) return;
+      n.innerHTML = svg;                       // keep the wrapper: .mk and the
+      n.removeAttribute('data-bx');            // theme icons are styled through it
+    });
     buildToc();
     applyTheme(); applyCvd(); checkNarrow();
     render();
