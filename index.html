@@ -1745,6 +1745,16 @@
       transition: background-color 320ms var(--ease-out), border-color 320ms var(--ease-out),
                   color 320ms var(--ease-out) !important
     }
+  
+    /* boxicons carry no intrinsic width/height, so every site that inlines one
+       has to give it a box — these two had none and collapsed to 0x0 */
+    .vramp .acts > span { display: flex; align-items: center; justify-content: center;
+      width: 20px; height: 20px; border-radius: 6px; cursor: pointer; color: inherit }
+    .vramp .acts svg { width: 15px; height: 15px; display: block }
+    .ban > span { display: flex; flex: none }
+    .ban svg { width: 16px; height: 16px; display: block }
+    .strip .stop .lk svg { width: 14px; height: 14px; display: block }
+    @media (hover: hover) { .vramp .acts > span:hover { background: rgb(0 0 0 / .08) } }
   </style>
 </head>
 
