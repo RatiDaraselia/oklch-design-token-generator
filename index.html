@@ -58,8 +58,8 @@
       --border-strong: var(--n200);
       --ring: rgb(44 128 246 / .35);
       --shadow: 0 1px 2px rgb(0 0 0 / .04), 0 8px 24px rgb(0 0 0 / .08);
-      --shadow-lg: 0 1px 0 #00000005, 0 1px 12px #0000000f, 0 0 1px #0000001a;
-      --swatch-ring: rgb(0 0 0 / .08);
+      --shadow-lg: 0 0 0 1px rgb(0 0 0 / .06), 0 1px 1px -.5px rgb(0 0 0 / .06), 0 3px 3px -1.5px rgb(0 0 0 / .06), 0 6px 6px -3px rgb(0 0 0 / .06), 0 12px 12px -6px rgb(0 0 0 / .06), 0 24px 24px -12px rgb(0 0 0 / .06);
+      --swatch-ring: transparent;
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
       --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
       --fast: 120ms cubic-bezier(.2, 0, 0, 1);
@@ -68,19 +68,19 @@
     }
 
     :root.dark {
-      --bg-page: #0d0d0e;
-      --bg-panel: #141416;
-      --bg-surface: #1a1b1c;
-      --bg-subtle: #212224;
-      --bg-hover: #2a2b2d;
-      --bg-active: #2d2e2f;
-      --text-primary: #eceded;
-      --text-secondary: #9d9ea1;
-      --text-muted: #7e8083;
-      --text-eyebrow: #7e8083;
-      --border: #2d2e2f;
-      --border-strong: #3a3b3e;
-      --swatch-ring: rgb(255 255 255 / .08);
+      --bg-page: #0d0d0d;
+      --bg-panel: #141414;
+      --bg-surface: #1b1b1b;
+      --bg-subtle: #222222;
+      --bg-hover: #2b2b2b;
+      --bg-active: #2e2e2e;
+      --text-primary: #ededed;
+      --text-secondary: #9f9f9f;
+      --text-muted: #808080;
+      --text-eyebrow: #808080;
+      --border: #2e2e2e;
+      --border-strong: #3b3b3b;
+      --swatch-ring: transparent;
       --e50: #2a1a1a;
       --e100: #3a1f21;
       --e700: #e88a8c;
@@ -366,7 +366,7 @@
     }
 
     section.blk>h2+p {
-      margin-top: 8px
+      margin-top: 10px
     }
 
     section.blk>h2+p+* {
@@ -415,7 +415,7 @@
     }
 
     .card>h3+p {
-      margin-top: 4px
+      margin-top: 5px
     }
 
     .card .body {
@@ -730,7 +730,7 @@
     .vramp {
       border-radius: 8px;
       overflow: hidden;
-      border: 1px solid var(--border)
+      border: 0
     }
 
     .vramp .vstop {
@@ -1396,10 +1396,10 @@
       --fig-tree: #dbdbdb; --fig-fill: #ebebeb;
     }
     :root.dark {
-      --fig-panel: #141416; --fig-field: #1a1b1c; --fig-border: #2d2e2f; --fig-rule: #2d2e2f;
-      --fig-label: #7e8083; --fig-text: #eceded; --fig-muted: #9d9ea1; --fig-value: #eceded;
-      --fig-dim: #7e8083; --fig-foot: #7e8083; --fig-num: #9d9ea1; --fig-sel: #2a2b2d;
-      --fig-tree: #3a3b3e; --fig-fill: #2a2b2d;
+      --fig-panel: #141414; --fig-field: #1b1b1b; --fig-border: #2e2e2e; --fig-rule: #2e2e2e;
+      --fig-label: #808080; --fig-text: #ededed; --fig-muted: #9f9f9f; --fig-value: #ededed;
+      --fig-dim: #808080; --fig-foot: #808080; --fig-num: #9f9f9f; --fig-sel: #2b2b2b;
+      --fig-tree: #3b3b3b; --fig-fill: #2b2b2b;
     }
 
     .side, .insp { background: var(--fig-panel); border: 0 }
@@ -1542,6 +1542,10 @@
     .sl .thumb {
       background: var(--fig-field); border: .5px solid var(--fig-rule);
       box-shadow: 0 1px 2px rgb(0 0 0 / .04), 0 4px 12px rgb(0 0 0 / .04)
+    }
+    :root.dark .sl .thumb {
+      background: #ffffff; border-color: #ebebeb;
+      box-shadow: 0 1px 2px rgb(0 0 0 / .2), 0 4px 12px rgb(0 0 0 / .2)
     }
     .sl .foot {
       margin-top: 0; font-family: var(--font-mono); font-size: 12px; line-height: 14px; color: var(--fig-foot)
@@ -1801,13 +1805,13 @@
       <main>
         <div class="col">
           <h1>Color system</h1>
-          <p class="sm sec" style="margin-top:8px">One brand color, read as a structural signature,
+          <p class="sm sec" style="margin-top:10px">One brand color, read as a structural signature,
             reissued across every semantic hue. Intensity is held as a share of each hue’s gamut ceiling, so the family
             stays consistent where absolute chroma cannot.</p>
 
           <section class="blk" id="s-how" style="margin-top:40px">
             <h2>How the system works</h2>
-            <div class="prose sm sec" style="margin-top:8px">
+            <div class="prose sm sec" style="margin-top:10px">
               <p>Everything on this page derives from a single input. The color you paste is read not as a value but as
                 a <strong>signature</strong> — three properties measured in OKLCH: its lightness, its
                 <strong>intensity</strong> (chroma expressed as a share of the most that hue can hold at that
