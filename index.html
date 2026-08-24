@@ -1484,7 +1484,11 @@
     /* one uninterrupted trunk, ending at the last row's centre. Drawing it per
        row instead left a gap wherever the elbow's arc curved away from x=0. */
     .side .nested::before {
-      content: ""; position: absolute; left: 2px; top: 0; bottom: 18px;
+      content: ""; position: absolute; left: 2px; top: 0;
+      /* stop where the last elbow's arc peels off — the row centre (18px) plus
+         the 6px corner radius. Ending at the centre instead leaves the trunk
+         hanging 6px past the junction, because the arc has already curved away. */
+      bottom: 24px;
       border-left: 1px solid var(--fig-tree); pointer-events: none
     }
     /* each row branches off the trunk with just the arc + its horizontal run */
