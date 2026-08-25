@@ -1571,7 +1571,7 @@
     .insp-head { display: flex; align-items: center; gap: 12px; width: 100% }
     .insp-head .isw {
       display: flex; align-items: center; justify-content: center;
-      width: 100%; height: 40px; border-radius: 8px; flex: none;
+      width: 100%; height: 64px; border-radius: 8px; flex: none;
       box-shadow: inset 0 0 0 1px var(--swatch-ring)
     }
     .insp-head .nm {
@@ -2590,7 +2590,7 @@
       MODEL.accents.forEach((r, i) => o['accent' + (i + 1)] = r);
       return o;
     };
-    const textOn = (hex, ramp) => contrast(hex, '#ffffff') >= contrast(hex, at(ramp, 900).hex) ? '#ffffff' : at(ramp, 900).hex;
+    const textOn = (hex, ramp) => contrast(hex, '#ffffff') >= 2.5 ? '#ffffff' : at(ramp, 900).hex;
 
     /* ========================= 6. DOM helpers ========================= */
     const $ = s => document.querySelector(s);
@@ -3259,32 +3259,15 @@
         swatchEl.style.backgroundColor = hex; 
         swatchEl.style.color = textOn(hex, ramp);
       };
-      const hexInput = el('input', { type: 'text', class: 'tnum hexfield', 'aria-label': 'Hex value' });
-      hexInput.value = okHex(cur());
-      const flagInvalid = bad => {
-        hexInput.style.borderColor = bad ? '#dc2626' : '';
-        hexInput.style.boxShadow = bad ? '0 0 0 3px rgb(220 38 38 / .35)' : '';
-      };
-      const commitHex = () => {
-        const raw = hexInput.value.trim();
-        const p = parseColor(raw) || parseColor(raw.startsWith('#') ? raw : '#' + raw);
-        if (!p || p.fmt !== 'hex') { flagInvalid(true); return; }
-        flagInvalid(false);
-        paintSwatch(p.hex);
-        setHex(p.hex);
-      };
-      hexInput.addEventListener('input', commitHex);
-      hexInput.addEventListener('change', () => { commitHex(); hexInput.value = okHex(cur()); flagInvalid(false); });
-      hexInput.addEventListener('keydown', e => { if (e.key === 'Enter') { commitHex(); hexInput.blur(); } });
 
       const headGrp = el('div', { class: 'sb-grp livesync' }, [
-        el('div', { class: 'insp-head' }, [ swatchEl ]),
-        hexInput
+        el('div', { class: 'insp-head' }, [ swatchEl ])
       ]);
       headGrp.update = () => {
         const hex = okHex(cur());
         paintSwatch(hex);
-        if (document.activeElement !== hexInput) { hexInput.value = hex; flagInvalid(false); }
+        headGrp.querySelector('.nm').textContent = (RAMP_LABEL[S.sel.ramp] || 'Accent ' + S.sel.ramp.replace('accent', '')) + ' ' + st.step
+          + (st.locked ? ' · locked' : '');
       };
 
       /* L / C / H */
