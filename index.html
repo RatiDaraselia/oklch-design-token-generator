@@ -3328,8 +3328,8 @@
         el('div', { class: 'sb-grp' }, [
           sr,
           el('div', { class: 'sb-row' }, [
-            fbtn(st.locked ? 'Unlock stop' : 'Lock stop', BX.lock, () => toggleLock(ramp.id, st), 'half'),
-            fbtn('Copy HEX', BX.copy, () => copy(st.hex, st.hex), 'half')
+            fbtn(st.locked ? 'Unlock stop' : 'Lock stop', BX.lock, () => toggleLock(ramp.id, st), 'half outline'),
+            fbtn('Copy HEX', BX.copy, () => copy(st.hex, st.hex), 'half outline')
           ])
         ])
       ]);
@@ -3339,12 +3339,12 @@
         el('div', { class: 'eyebrow', text: 'Export' }),
         el('div', { class: 'sb-grp g6' }, [
           el('div', { style: 'display: grid; grid-template-columns: 1fr 1fr; gap: 6px; width: 100%' }, [
-            fbtn('CSS', LOGO.css, () => copy(exportText('css'), 'CSS'), 'tall lead'),
-            fbtn('Tailwind', LOGO.tailwind, () => copy(exportText('tw'), 'Tailwind theme'), 'tall lead'),
-            fbtn('JSON', LOGO.json, () => copy(exportText('json'), 'JSON'), 'tall lead'),
-            fbtn('DTCG', LOGO.dtcg, () => copy(exportText('dtcg'), 'DTCG tokens'), 'tall lead')
+            fbtn('CSS', LOGO.css, () => copy(exportText('css'), 'CSS'), 'tall lead solid'),
+            fbtn('Tailwind', LOGO.tailwind, () => copy(exportText('tw'), 'Tailwind theme'), 'tall lead solid'),
+            fbtn('JSON', LOGO.json, () => copy(exportText('json'), 'JSON'), 'tall lead solid'),
+            fbtn('DTCG', LOGO.dtcg, () => copy(exportText('dtcg'), 'DTCG tokens'), 'tall lead solid')
           ]),
-          fbtn('Share link', BX.share, shareLink, 'tall')
+          fbtn('Share link', BX.share, shareLink, 'tall solid')
         ])
       ]);
 
