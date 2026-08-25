@@ -1508,10 +1508,9 @@
     .fbtn {
       display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;
       height: 32px; padding: 0 12px; border: 0; border-radius: 8px;
-      background: var(--bg-surface); color: var(--fig-text); font-family: var(--font-sans);
+      background: var(--fig-sel); color: var(--fig-text); font-family: var(--font-sans);
       font-size: 13px; line-height: 13px; font-weight: 500; letter-spacing: -.26px;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 1px 1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-      transition: background var(--fast), box-shadow var(--fast)
+      transition: background var(--fast), box-shadow var(--fast), transform var(--fast);
     }
     .fbtn svg { flex: none; display: block }
     /* boxicons carry no intrinsic size, so give them one — the vendored format
@@ -1521,7 +1520,8 @@
     .bi { display: flex; flex: none }
     .fbtn.tall { height: 40px }
     .fbtn.lead { justify-content: center; padding-left: 8px; padding-right: 12px; }
-    .fbtn.solid { background: var(--fig-fill); box-shadow: none; }
+    .fbtn.solid { background: var(--bg-surface); }
+    .fbtn.outline { background: transparent; box-shadow: inset 0 0 0 .5px var(--fig-rule); }
     .fbtn.half { width: auto; flex: 1; min-width: 0 }
 
     /* readout rows — shared by Family signature and the inspector Readouts */
@@ -1880,13 +1880,13 @@
         0 0 0 .5px rgba(255, 255, 255, .07);
     }
 
-    .fbtn { box-shadow: var(--btn-lift); transition: background var(--fast), box-shadow var(--fast), transform var(--fast) }
+    .fbtn:active, .fbtn.outline:active { transform: translateY(.5px) }
     .fbtn.solid { box-shadow: var(--btn-lift) }
     /* pressing settles the face and flips the lighting inward */
-    .fbtn:active, .fbtn.solid:active { box-shadow: var(--btn-press); transform: translateY(.5px) }
+    .fbtn.solid:active { box-shadow: var(--btn-press); transform: translateY(.5px) }
     @media (hover: hover) {
-      .fbtn:hover, .fbtn.solid:hover { box-shadow: var(--btn-lift-hover) }
-      .fbtn:active:hover, .fbtn.solid:active:hover { box-shadow: var(--btn-press) }
+      .fbtn.solid:hover { box-shadow: var(--btn-lift-hover) }
+      .fbtn.solid:active:hover { box-shadow: var(--btn-press) }
     }
   </style>
 </head>
@@ -1950,7 +1950,7 @@
             <div class="eyebrow">Family signature</div>
             <div class="sb-grp">
               <div class="sigread" id="sigread"></div>
-              <button class="fbtn" id="btnSig"><span class="bi" data-bx="sliderAlt"></span>Edit signature</button>
+              <button class="fbtn outline" id="btnSig"><span class="bi" data-bx="sliderAlt"></span>Edit signature</button>
             </div>
           </div>
 
@@ -1962,7 +1962,7 @@
               <div id="saved"></div>
               <div class="sb-row">
                 <button class="fbtn tall solid half" id="btnSave">Save current</button>
-                <button class="fbtn tall half" id="btnReset">Reset</button>
+                <button class="fbtn tall half outline" id="btnReset">Reset</button>
               </div>
             </div>
           </div>
