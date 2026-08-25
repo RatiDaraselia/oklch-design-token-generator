@@ -1603,7 +1603,12 @@
     .sl .track { height: 6px; border-radius: 999px }
     .sl .stub { height: 6px; background: var(--bg-subtle); border: .5px solid var(--fig-border); border-left: 0 }
     .sl .thumb { background: var(--fig-field); border: .5px solid var(--fig-rule) }
-    :root.dark .sl .thumb { background: #ffffff; border-color: #ebebeb }
+    /* Dark handles are near-black rather than white — a white disc on these
+       surfaces reads as a glare spot. #2e2e2e sits far enough above the plain
+       #222 track to stay a distinct knob, and the lighter rim carries the edge
+       everywhere the fill cannot: against the panel, and against the black end
+       of the lightness gradient. */
+    :root.dark .sl .thumb { background: #2e2e2e; border-color: #525252 }
     .sl .foot {
       margin-top: 0; font-family: var(--font-sans); font-size: 12px; line-height: 14px; color: var(--fig-foot)
     }
