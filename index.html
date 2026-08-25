@@ -1184,6 +1184,41 @@
          page's, so a dark preview on a light page gets a dark-theme shadow */
     }
 
+    /* Semantic tuning — the anchor → tuned strip. The rule and the strip run the
+       full width of the card (past its 32px padding) and the four roles sit in
+       equal columns split by hairlines, so the row reads as one table rather
+       than four loose chips wrapping onto a second line. */
+    .card > hr.bleed {
+      margin: 16px -32px 24px;
+      width: calc(100% + 64px)
+    }
+    .tunegrid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      margin-inline: -32px;
+      width: calc(100% + 64px)
+    }
+    .tunegrid > div {
+      min-width: 0;
+      /* 24 / 8. The right side stays tight because the longest label ("success ·
+         anchor → tuned") needs 147px, and a 190px column has only so much to
+         give once the divider and the left inset are paid for. */
+      padding: 0 8px 0 24px;
+      border-left: .5px solid var(--border)
+    }
+    .tunegrid > div:first-child { border-left: 0 }
+    /* the role name carries the weight; the relationship stays regular */
+    .tunegrid .rn { font-weight: 500 }
+    /* below the full-width card the columns can no longer hold the label on one
+       line; balance the break rather than leaving it ragged */
+    .tunegrid .ms { text-wrap: balance }
+    /* four columns get too narrow to read on a phone; fold to two */
+    @media (max-width: 899px) {
+      .tunegrid { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+      .tunegrid > div:nth-child(3) { border-left: 0 }
+      .tunegrid > div:nth-child(n+3) { margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border) }
+    }
+
     .swgrid {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
@@ -1991,8 +2026,8 @@
               <summary><span class="mk" data-bx="chevronRight"></span>Semantic tuning</summary>
               <div class="card">
                 <div class="grid2" id="tuneSliders"></div>
-                <hr>
-                <div id="tunePrev" class="row" style="gap:16px; flex-wrap:wrap"></div>
+                <hr class="bleed">
+                <div id="tunePrev" class="tunegrid"></div>
               </div>
             </details>
           </section>
@@ -2898,7 +2933,9 @@
             el('span', { style: 'width:36px;height:36px;border-radius:8px 0 0 8px;background:' + anchorHex }),
             el('span', { style: 'width:36px;height:36px;border-radius:0 8px 8px 0;background:' + base })
           ]),
-          el('div', { class: 'ms mut mono', style: 'margin-top:4px', text: r + ' · anchor → tuned' })
+          el('div', { class: 'ms mut', style: 'margin-top:8px' }, [
+            el('span', { class: 'rn', text: r }), el('span', { text: ' · anchor → tuned' })
+          ])
         ]));
       });
 
