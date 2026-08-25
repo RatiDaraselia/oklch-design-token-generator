@@ -2690,7 +2690,7 @@
           stub.style.flex = (1 - share) + ' 0 0';
           stub.style.display = share > 0.995 ? 'none' : 'block';
         } else { reachTrack.style.flex = '1 1 auto'; stub.style.display = 'none'; }
-        foot.textContent = cfg.foot ? '— ' + cfg.foot(v) : '';
+        foot.textContent = cfg.foot ? '‒ ' + cfg.foot(v) : '';
         reachTrack.setAttribute('aria-valuemin', fx(cfg.min, cfg.dec));
         reachTrack.setAttribute('aria-valuemax', fx(r, cfg.dec));
         reachTrack.setAttribute('aria-valuenow', fx(v, cfg.dec));
@@ -2905,7 +2905,7 @@
       const host = $('#saved'); host.innerHTML = '';
       let list = [];
       try { list = JSON.parse(localStorage.getItem('csg.saved') || '[]'); } catch (e) { }
-      if (!list.length) { host.append(el('p', { class: 'sb-empty', text: '— Nothing saved yet.' })); return; }
+      if (!list.length) { host.append(el('p', { class: 'sb-empty', text: '‒ Nothing saved yet.' })); return; }
       list.forEach((it, i) => host.append(el('div', { class: 'row', style: 'gap:6px' }, [
         el('button', { class: 'navitem', style: 'flex:1', onclick: () => { S = Object.assign(JSON.parse(JSON.stringify(DEF)), it.state); render(); persist(); toast('Loaded ' + it.name); } },
           [el('span', { class: 'dot', style: 'background:' + it.hex }), el('span', { text: it.name })]),
