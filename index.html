@@ -1513,6 +1513,8 @@
       transition: background var(--fast), box-shadow var(--fast), transform var(--fast);
     }
     .fbtn svg { flex: none; display: block }
+    .fbtn svg[width] { filter: saturate(0) opacity(0.6); transition: filter var(--fast) }
+    @media (hover: hover) { .fbtn:hover svg[width] { filter: saturate(1) opacity(1) } }
     /* boxicons carry no intrinsic size, so give them one — the vendored format
        logos do carry width/height (and are not all square), so leave those be */
     .fbtn svg:not([width]) { width: 16px; height: 16px }
