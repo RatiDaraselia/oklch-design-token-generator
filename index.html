@@ -2723,47 +2723,113 @@
         const atEnd = c <= cfg.min || c >= r;
         if (atEnd && !wasAtEnd) haptic(12);
         wasAtEnd = atEnd;
-        cfg.set(c); update(); render(false);
+        cfg.set(c); update(c, springRaf !== null); render(false);
       };
-      function update() {
-        const v = cfg.get(), r = reach();
+      reachTrack.style.border = '0.5px solid var(--fig-border)';   // constant, set once
+      /* `at` is the authoritative value to paint. The spring passes the position
+         it just computed, because cfg.get() reads a *derived* MODEL that only
+         catches up when build() runs on a later frame — driving the handle from
+         it made the travel advance in steps tied to the render cadence rather
+         than to the animation. `cheap` skips everything that cannot change while
+         this slider is the one being dragged: its own gradient depends on the
+         other two channels, not on the value in motion, and recomputing it meant
+         ~360 gamut bisections plus a full-width repaint every frame. */
+      function update(at, cheap) {
+        const v = at === undefined ? cfg.get() : at, r = reach();
         const frac = (v - cfg.min) / Math.max(1e-9, r - cfg.min);
         thumb.style.left = (frac * 100) + '%';
         num.value = fx(v, cfg.dec) + (cfg.unit || '');
+        foot.textContent = cfg.foot ? '\u2012 ' + cfg.foot(v) : '';
+        reachTrack.setAttribute('aria-valuenow', fx(v, cfg.dec));
+        if (cheap) return;
         reachTrack.style.background = cfg.grad ? cfg.grad() : 'var(--bg-subtle)';
-        reachTrack.style.border = '0.5px solid var(--fig-border)';
         if (cfg.domainMax) {
           const share = clamp(r / cfg.domainMax, 0.04, 1);
           reachTrack.style.flex = share + ' 0 0';
           stub.style.flex = (1 - share) + ' 0 0';
           stub.style.display = share > 0.995 ? 'none' : 'block';
         } else { reachTrack.style.flex = '1 1 auto'; stub.style.display = 'none'; }
-        foot.textContent = cfg.foot ? '‒ ' + cfg.foot(v) : '';
         reachTrack.setAttribute('aria-valuemin', fx(cfg.min, cfg.dec));
         reachTrack.setAttribute('aria-valuemax', fx(r, cfg.dec));
-        reachTrack.setAttribute('aria-valuenow', fx(v, cfg.dec));
         reachTrack.setAttribute('aria-valuetext', (cfg.vt ? cfg.vt(v) : fx(v, cfg.dec) + (cfg.unit || '')));
       }
       const fromX = e => {
         const b = reachTrack.getBoundingClientRect();
         return cfg.min + clamp((e.clientX - b.left) / b.width, 0, 1) * (reach() - cfg.min);
       };
+
+      /* The handle chases the pointer instead of being pinned to it. Each frame
+         it closes a fixed *fraction* of the remaining gap, which is what gives
+         the weight — fast while far away, easing as it arrives, never a hard
+         stop. Deliberately critically damped with no release momentum: a colour
+         slider that coasted past where you let go would land you on a different
+         colour than the one you aimed at. */
+      const FOLLOW = 22;                  // 1/s, ~45ms time constant
+      let target = null, springRaf = null, springSafety = null;
+      /* `pos` is the spring's own position. It cannot integrate on cfg.get():
+         these sliders set state (S.*) but read a derived model (MODEL.*) that
+         only catches up when build() runs on the next frame, so feeding back on
+         get() would integrate a stale value and stutter. */
+      let pos = null, lastT = 0, holding = false, trackW = 1;
+      // half a pixel of travel, expressed in this slider's own units
+      const settled = d => Math.abs(d) <= (reach() - cfg.min) / trackW * 0.5;
+
+      /* Single exit point, safe to call twice. rAF stops entirely in a
+         background tab, so cleanup can never be left to the spring alone —
+         a stranded `dragging` would throttle every render for the session. */
+      function stopSpring() {
+        if (springRaf) { cancelAnimationFrame(springRaf); springRaf = null; }
+        clearTimeout(springSafety); springSafety = null;
+        if (target !== null) setV(target);
+        pos = null;
+        wrap.dataset.track = '0';
+        if (!holding) { dragging = false; persist(); }
+      }
+
+      function spring(now) {
+        // frame-rate independent, so 60Hz and 120Hz feel identical
+        // clamp both ends: a negative or wild delta (clock skew on tab restore)
+        // would otherwise blow exp() up and fling the handle to a rail
+        const dt = Math.min(0.05, Math.max(0, (now - lastT) / 1000)) || 0.016;
+        lastT = now;
+        const d = target - pos;
+        if (settled(d)) { springRaf = null; stopSpring(); return; }
+        pos += d * (1 - Math.exp(-FOLLOW * dt));
+        setV(pos);
+        springRaf = requestAnimationFrame(spring);
+      }
+      const springTo = v => {
+        target = clamp(v, cfg.min, reach());
+        if (pos === null) pos = cfg.get();   // seed once, from the live value
+        if (springRaf) return;
+        lastT = performance.now();
+        springRaf = requestAnimationFrame(spring);
+      };
+
       reachTrack.addEventListener('pointerdown', e => {
         reachTrack.setPointerCapture(e.pointerId);
-        wrap.dataset.drag = '1'; dragging = true; haptic(8);
-        // data-track is deliberately not set yet: this first jump keeps its
-        // transition, so clicking anywhere on the bar glides the handle over
-        // instead of teleporting to the cursor
-        setV(fromX(e));
-        const mv = ev => { wrap.dataset.track = '1'; setV(fromX(ev)); };
+        holding = true; dragging = true;
+        wrap.dataset.drag = '1';
+        // the spring owns the position now, so the CSS `left` easing has to step
+        // aside or the two would compound into mush
+        wrap.dataset.track = '1';
+        trackW = Math.max(1, reachTrack.getBoundingClientRect().width);
+        haptic(8);
+        springTo(fromX(e));
+        const mv = ev => springTo(fromX(ev));
         const end = () => {
-          wrap.dataset.drag = '0'; wrap.dataset.track = '0'; dragging = false;
+          holding = false; wrap.dataset.drag = '0';
           reachTrack.removeEventListener('pointermove', mv);
           reachTrack.removeEventListener('pointerup', end);
           // without this a cancelled pointer would leave `dragging` stuck true
           // and throttle every render for the rest of the session
           reachTrack.removeEventListener('pointercancel', end);
-          render(false); persist();
+          // let an in-flight spring coast to its target, but never depend on it
+          // finishing — a timer still fires when frames do not
+          if (springRaf) {
+            clearTimeout(springSafety);
+            springSafety = setTimeout(stopSpring, 600);
+          } else stopSpring();
         };
         reachTrack.addEventListener('pointermove', mv);
         reachTrack.addEventListener('pointerup', end);
@@ -3402,31 +3468,43 @@
     }
 
     /* ========================= 11. render root ========================= */
-    let raf = null, dragging = false, lastHeavy = 0, heavyCost = 0, trailing = null;
+    let raf = null, dragging = false, lastHeavy = 0, trailing = null;
+    let lastFrameT = 0, frameMs = 16;   // smoothed real frame interval
     function render(full) {
       if (full !== false) { build(); renderSidebar(); renderWorkspace(); renderInspector(); persist(); return; }
       if (raf) return;
-      raf = requestAnimationFrame(() => {
-        raf = null; build();
-        /* Rebuilding the workspace recreates ~1250 nodes. That is fine once and
-           ruinous at 60Hz — it is what made dragging feel stiff, not the easing.
-           While a thumb is held we back off in proportion to what the rebuild
-           actually costs on this machine: a fast one never skips a frame, a slow
-           one stops fighting the pointer for the main thread. The thumb, its
-           gradient and its readout are written synchronously in update(), so the
-           control itself stays 1:1 with the cursor either way. */
+      raf = requestAnimationFrame(ts => {
+        raf = null;
+        // observed frame interval, smoothed. This is the honest signal: it
+        // includes layout, paint and compositing, which on a 4K panel cost far
+        // more than the script does — timing our own JS would miss all of it.
+        if (lastFrameT) frameMs = frameMs * 0.6 + Math.min(100, ts - lastFrameT) * 0.4;
+        lastFrameT = ts;
+        /* A committed frame costs ~1250 recreated nodes plus build()'s 411 gamut
+           bisections. That is fine once and ruinous at 60Hz — it is what made
+           dragging feel stiff, not the easing. While a thumb is held we back off
+           in proportion to what the pass actually costs on this machine: a fast
+           one never skips a frame, a slow one stops fighting the pointer for the
+           main thread. Nothing above this check may touch the engine, or a
+           skipped frame would not actually be skipping anything. The handle is
+           painted synchronously from the spring's own value in update(), so it
+           stays smooth no matter which frames commit. */
         const now = performance.now();
-        if (dragging && heavyCost > 6 && now - lastHeavy < heavyCost * 3) {
+        // Commit cadence tracks what the machine actually achieves: comfortable
+        // frames commit often, long ones commit rarely so the handle keeps the
+        // main thread. Bounded at both ends — never faster than ~16/s (pointless
+        // for colour that changes this gradually), never slower than 5/s (the
+        // ramps would read as frozen rather than following).
+        const budget = clamp(frameMs * 4, 60, 200);
+        if (dragging && now - lastHeavy < budget) {
           // guarantee the skipped frame still lands if the pointer goes still
           clearTimeout(trailing);
-          trailing = setTimeout(() => render(false), heavyCost * 3);
-          persist(); return;
+          trailing = setTimeout(() => render(false), budget);
+          return;                    // persist() is debounced; nothing owed here
         }
         clearTimeout(trailing); trailing = null;
         lastHeavy = now;
-        const t0 = performance.now();
-        renderSidebar(); renderWorkspace();
-        heavyCost = performance.now() - t0;
+        build(); renderSidebar(); renderWorkspace();
         $('#inspBody').querySelectorAll('.sl,.livesync').forEach(s => s.update && s.update());
         persist();
       });
