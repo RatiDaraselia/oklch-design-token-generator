@@ -536,6 +536,16 @@
       line-height: 1.6;
       resize: vertical
     }
+    textarea::placeholder, input::placeholder {
+      color: var(--fig-muted);
+      opacity: 0.6;
+    }
+    textarea::-webkit-resizer {
+      background-color: var(--fig-dim);
+      -webkit-mask-image: url("data:image/svg+xml,%3Csvg width='12' height='12' viewBox='0 0 12 12' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='10' cy='10' r='1' fill='black'/%3E%3Ccircle cx='6' cy='10' r='1' fill='black'/%3E%3Ccircle cx='2' cy='10' r='1' fill='black'/%3E%3Ccircle cx='10' cy='6' r='1' fill='black'/%3E%3Ccircle cx='6' cy='6' r='1' fill='black'/%3E%3Ccircle cx='10' cy='2' r='1' fill='black'/%3E%3C/svg%3E");
+      -webkit-mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+    }
 
     .chip {
       display: inline-flex;
