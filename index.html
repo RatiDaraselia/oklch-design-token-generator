@@ -130,14 +130,6 @@
        Inter throughout, so override it at the source rather than per-component. */
     code, kbd, samp, pre { font-family: var(--font-sans) }
 
-    /* Tabular figures. Formerly a monospace face; the page is Inter throughout
-       now, so this only locks digit width so numeric columns still align. */
-    .tnum,
-    input.tnum,
-    .tnum * {
-      font-variant-numeric: tabular-nums
-    }
-
     h1,
     h2,
     h3 {
@@ -561,7 +553,6 @@
       background: var(--bg-subtle);
       font-size: 12px;
       font-family: var(--font-sans);
-      font-variant-numeric: tabular-nums
     }
 
     .chip.tok {
@@ -606,7 +597,6 @@
       height: 38px;
       padding: 0;
       font-family: var(--font-sans);
-      font-variant-numeric: tabular-nums;
       font-size: 13px;
       width: 100%
     }
@@ -703,7 +693,6 @@
 
     .sigread span:last-child {
       font-family: var(--font-sans);
-      font-variant-numeric: tabular-nums;
       font-size: 12px
     }
 
@@ -730,7 +719,6 @@
     .strip .stop .n,
     .strip .stop .h {
       font-family: var(--font-sans);
-      font-variant-numeric: tabular-nums;
       font-size: 12px;
       line-height: 1.5
     }
@@ -788,28 +776,24 @@
       width: 36px;
       font-family: var(--font-sans);
       font-size: 13px;
-      font-variant-numeric: tabular-nums
     }
 
     .vramp .vstop .hx {
       width: 80px;
       font-family: var(--font-sans);
       font-size: 13px;
-      font-variant-numeric: tabular-nums
     }
 
     .vramp .vstop .ok {
       flex: 1;
       font-family: var(--font-sans);
       font-size: 12px;
-      font-variant-numeric: tabular-nums;
       opacity: .85
     }
 
     .vramp .vstop .cr {
       font-family: var(--font-sans);
       font-size: 12px;
-      font-variant-numeric: tabular-nums;
       opacity: .85
     }
 
@@ -862,7 +846,6 @@
       text-align: right;
       font-family: var(--font-sans);
       font-size: 12px;
-      font-variant-numeric: tabular-nums;
       border-radius: 8px;
       padding: 0 8px
     }
@@ -900,27 +883,18 @@
       top: 50%;
       width: 20px;
       height: 20px;
-      margin-top: -10px;
-      margin-left: -10px;
       border-radius: 999px;
       background: var(--bg-surface);
-      border: .5px solid var(--border);
-      box-shadow: 0 1px 3px rgb(0 0 0 / .08), 0 4px 12px rgb(0 0 0 / .05), 0 8px 24px rgb(0 0 0 / .04);
-      transition: width var(--fast), height var(--fast)
-    }
-
-    .sl[data-drag="1"] .thumb {
-      width: 24px;
-      height: 24px;
-      margin-top: -12px;
-      margin-left: -12px
+      border: .5px solid var(--border)
+      /* centring, elevation and motion all live in the slider-feel block at the
+         end of the sheet, so the interaction states can out-order the dark
+         override without an !important */
     }
 
     .sl .foot {
       margin-top: 8px;
       font-family: var(--font-sans);
       font-size: 12px;
-      font-variant-numeric: tabular-nums;
       color: var(--text-secondary)
     }
 
@@ -938,7 +912,6 @@
     .mtx th,
     .mtx td {
       font-family: var(--font-sans);
-      font-variant-numeric: tabular-nums;
       font-size: 11px;
       text-align: center;
       padding: 0;
@@ -996,7 +969,6 @@
 
     .tbl td.m {
       font-family: var(--font-sans);
-      font-variant-numeric: tabular-nums;
       font-size: 12px
     }
 
@@ -1078,7 +1050,6 @@
       margin: 0;
       padding: 16px;
       font-family: var(--font-code);
-      font-variant-numeric: tabular-nums;
       font-size: 13px;
       line-height: 1.6;
       overflow: auto;
@@ -1265,7 +1236,6 @@
       bottom: 0;
       padding: 3px 4px;
       font-family: var(--font-sans);
-      font-variant-numeric: tabular-nums;
       font-size: 11px;
       background: rgb(255 255 255 / .82);
       color: #1b1b1b
@@ -1632,14 +1602,8 @@
     .sl .trackrow { margin-top: 4px; height: 24px }
     .sl .track { height: 6px; border-radius: 999px }
     .sl .stub { height: 6px; background: var(--bg-subtle); border: .5px solid var(--fig-border); border-left: 0 }
-    .sl .thumb {
-      background: var(--fig-field); border: .5px solid var(--fig-rule);
-      box-shadow: 0 1px 3px rgb(0 0 0 / .08), 0 4px 12px rgb(0 0 0 / .05), 0 8px 24px rgb(0 0 0 / .04)
-    }
-    :root.dark .sl .thumb {
-      background: #ffffff; border-color: #ebebeb;
-      box-shadow: 0 1px 3px rgb(0 0 0 / .3), 0 4px 12px rgb(0 0 0 / .2), 0 8px 24px rgb(0 0 0 / .2)
-    }
+    .sl .thumb { background: var(--fig-field); border: .5px solid var(--fig-rule) }
+    :root.dark .sl .thumb { background: #ffffff; border-color: #ebebeb }
     .sl .foot {
       margin-top: 0; font-family: var(--font-sans); font-size: 12px; line-height: 14px; color: var(--fig-foot)
     }
@@ -1728,7 +1692,7 @@
     .code pre {
       margin: 0; padding: 12px 20px; border-radius: 12px; background: var(--code-surface);
       box-shadow: 0 2px 0 0 rgb(0 0 0 / .03), 0 1px 2px 0 rgb(0 0 0 / .05), 0 6px 10px 0 rgb(0 0 0 / .02);
-      font-family: var(--font-code); font-variant-numeric: tabular-nums;
+      font-family: var(--font-code);
       font-size: 14px; line-height: 20px;
       white-space: pre; tab-size: 2; overflow: auto; max-height: 420px; color: var(--code-fg)
     }
@@ -1747,7 +1711,7 @@
     .prose code {
       font-family: var(--font-sans); font-size: .9em; padding: 2px 6px; border-radius: 6px;
       background: var(--bg-subtle); color: var(--text-primary);
-      font-variant-numeric: tabular-nums; white-space: nowrap
+      white-space: nowrap
     }
   
     /* "On this page" rail */
@@ -1898,6 +1862,55 @@
       .fbtn.solid:hover { box-shadow: var(--btn-lift-hover) }
       .fbtn.solid:active:hover { box-shadow: var(--btn-press) }
     }
+
+    /* ================= slider feel =================
+       The thumb reads as a physical control: it lifts under the pointer, sinks
+       into a firmer grip while held, and settles back on release. Elevation
+       follows the same per-theme reasoning as the buttons above — black layers
+       carry the shape on a light surface and read as nothing on a dark one, so
+       dark leans on heavier casts instead. This block sits last on purpose: the
+       interaction states have to out-order `:root.dark .sl .thumb` on box-shadow
+       without reaching for !important. */
+    :root {
+      --thumb-lift: 0 1px 3px rgb(0 0 0 / .08), 0 4px 12px rgb(0 0 0 / .05), 0 8px 24px rgb(0 0 0 / .04);
+      --thumb-lift-hover: 0 0 0 5px rgb(0 0 0 / .04), 0 2px 6px rgb(0 0 0 / .13), 0 8px 20px rgb(0 0 0 / .1), 0 14px 36px rgb(0 0 0 / .07);
+      --thumb-grab: 0 0 0 7px rgb(0 0 0 / .06), 0 3px 8px rgb(0 0 0 / .18), 0 12px 28px rgb(0 0 0 / .14), 0 20px 44px rgb(0 0 0 / .09);
+    }
+    :root.dark {
+      --thumb-lift: 0 1px 3px rgb(0 0 0 / .3), 0 4px 12px rgb(0 0 0 / .2), 0 8px 24px rgb(0 0 0 / .2);
+      /* the halo goes white here: a black ring on a dark panel is a no-op, the
+         same reason the buttons flip their lighting between themes */
+      --thumb-lift-hover: 0 0 0 5px rgb(255 255 255 / .08), 0 2px 6px rgb(0 0 0 / .45), 0 8px 20px rgb(0 0 0 / .35), 0 14px 36px rgb(0 0 0 / .3);
+      --thumb-grab: 0 0 0 7px rgb(255 255 255 / .12), 0 3px 8px rgb(0 0 0 / .55), 0 12px 28px rgb(0 0 0 / .45), 0 20px 44px rgb(0 0 0 / .35);
+    }
+
+    .sl .thumb {
+      box-shadow: var(--thumb-lift);
+      transform: translate(-50%, -50%) scale(1);
+      /* `left` eases so a click on the bar, a keyboard step and a brand-driven
+         re-render all glide instead of teleporting; the tracking rule below
+         drops it again once the pointer is genuinely dragging */
+      transition: left var(--med), transform var(--fast), box-shadow var(--fast)
+    }
+    @media (hover: hover) {
+      .sl .track:hover .thumb { transform: translate(-50%, -50%) scale(1.15); box-shadow: var(--thumb-lift-hover) }
+    }
+    /* keyboard users get the same affordance the pointer gets */
+    .sl .track:focus-visible .thumb { transform: translate(-50%, -50%) scale(1.15); box-shadow: var(--thumb-lift-hover) }
+    /* Must follow :hover — the pointer is still over the track while dragging,
+       so this needs to win on source order. */
+    .sl[data-drag="1"] .thumb {
+      transform: translate(-50%, -50%) scale(1.3);
+      box-shadow: var(--thumb-grab)
+    }
+    /* Pressing and moving are separate states on purpose. data-drag is the grab
+       *look*; data-track only appears once the pointer actually moves, and is
+       the one that drops the `left` transition — easing position while dragging
+       would leave the handle trailing the cursor. A plain click never sets it,
+       so the handle glides to where you clicked. */
+    .sl[data-track="1"] .thumb {
+      transition: transform var(--fast), box-shadow var(--fast)
+    }
   </style>
 </head>
 
@@ -1940,9 +1953,9 @@
               <div class="sb-row">
                 <span class="sw large" id="bsw"></span>
                 <div class="brandfield">
-                  <input id="binput" class="tnum" type="text" value="#5b93eb" spellcheck="false"
+                  <input id="binput" type="text" value="#5b93eb" spellcheck="false"
                     aria-label="Brand color value">
-                  <span class="tnum" id="bfmt">hex</span>
+                  <span id="bfmt">hex</span>
                 </div>
               </div>
               <div class="rule24"></div>
@@ -2144,7 +2157,7 @@
             <h2>Analyze an existing palette</h2>
             <p class="sm sec">Paste hex values to read their structure, then harmonize them onto one signature while
               keeping each hue’s identity.</p>
-            <textarea id="anIn" rows="3" class="tnum" spellcheck="false"
+            <textarea id="anIn" rows="3" spellcheck="false"
               placeholder="#2c80f6, #ca252d, #21863c, #93661c"></textarea>
             <div class="row" style="margin-top:8px; gap:8px">
               <button class="btn sec" id="btnAn">Analyze</button>
@@ -2190,7 +2203,7 @@
             </div>
           </section>
 
-          <p class="cap mut tnum" id="mathTest" style="margin-top:-24px"></p>
+          <p class="cap mut" id="mathTest" style="margin-top:-24px"></p>
         </div>
           <aside class="toc-rail" aria-label="On this page">
             <div class="toc-head">
@@ -2682,10 +2695,17 @@
     };
 
     /* ========================= 7. sliders ========================= */
+    /* Haptics where the platform actually has them. navigator.vibrate is
+       Android-only in practice — iOS Safari and every desktop browser leave it
+       undefined, so this is a silent no-op there rather than a fallback. Kept
+       to discrete moments (grab, keyboard step, arriving at an end) so dragging
+       never turns into a continuous buzz. */
+    const haptic = ms => { try { navigator.vibrate?.(ms); } catch (e) { } };
+
     function slider(cfg) {
       // cfg: {label, min, max, unit, step, dec, get, set, domainMax, reach, grad}
       const wrap = el('div', { class: 'sl' });
-      const num = el('input', { type: 'text', class: 'tnum', 'aria-label': cfg.label });
+      const num = el('input', { type: 'text', 'aria-label': cfg.label });
       const top = el('div', { class: 'top' }, [el('label', { text: cfg.label }), num]);
       const reachTrack = el('div', { class: 'track reach', tabindex: '0', role: 'slider' });
       const thumb = el('div', { class: 'thumb' });
@@ -2696,7 +2716,15 @@
       wrap.append(top, trow, foot);
 
       const reach = () => cfg.reach ? cfg.reach() : cfg.max;
-      const setV = v => { cfg.set(clamp(v, cfg.min, reach())); update(); render(false); };
+      let wasAtEnd = false;
+      const setV = v => {
+        const r = reach(), c = clamp(v, cfg.min, r);
+        // one tick on arrival at either end, not for every frame held there
+        const atEnd = c <= cfg.min || c >= r;
+        if (atEnd && !wasAtEnd) haptic(12);
+        wasAtEnd = atEnd;
+        cfg.set(c); update(); render(false);
+      };
       function update() {
         const v = cfg.get(), r = reach();
         const frac = (v - cfg.min) / Math.max(1e-9, r - cfg.min);
@@ -2721,20 +2749,32 @@
         return cfg.min + clamp((e.clientX - b.left) / b.width, 0, 1) * (reach() - cfg.min);
       };
       reachTrack.addEventListener('pointerdown', e => {
-        reachTrack.setPointerCapture(e.pointerId); wrap.dataset.drag = '1'; setV(fromX(e));
-        const mv = ev => setV(fromX(ev));
-        const up = () => {
-          wrap.dataset.drag = '0'; reachTrack.removeEventListener('pointermove', mv);
-          reachTrack.removeEventListener('pointerup', up); persist();
+        reachTrack.setPointerCapture(e.pointerId);
+        wrap.dataset.drag = '1'; dragging = true; haptic(8);
+        // data-track is deliberately not set yet: this first jump keeps its
+        // transition, so clicking anywhere on the bar glides the handle over
+        // instead of teleporting to the cursor
+        setV(fromX(e));
+        const mv = ev => { wrap.dataset.track = '1'; setV(fromX(ev)); };
+        const end = () => {
+          wrap.dataset.drag = '0'; wrap.dataset.track = '0'; dragging = false;
+          reachTrack.removeEventListener('pointermove', mv);
+          reachTrack.removeEventListener('pointerup', end);
+          // without this a cancelled pointer would leave `dragging` stuck true
+          // and throttle every render for the rest of the session
+          reachTrack.removeEventListener('pointercancel', end);
+          render(false); persist();
         };
-        reachTrack.addEventListener('pointermove', mv); reachTrack.addEventListener('pointerup', up);
+        reachTrack.addEventListener('pointermove', mv);
+        reachTrack.addEventListener('pointerup', end);
+        reachTrack.addEventListener('pointercancel', end);
       });
       reachTrack.addEventListener('keydown', e => {
         const dir = e.key === 'ArrowRight' || e.key === 'ArrowUp' ? 1 : (e.key === 'ArrowLeft' || e.key === 'ArrowDown' ? -1 : 0);
         if (!dir) return;
         e.preventDefault();
         const unit = cfg.step * (e.shiftKey ? 10 : e.altKey ? 0.1 : 1);
-        setV(cfg.get() + dir * unit); persist();
+        haptic(6); setV(cfg.get() + dir * unit); persist();
       });
       num.addEventListener('change', () => { const v = parseFloat(num.value.replace(/[^0-9.\-]/g, '')); if (!isNaN(v)) setV(v); persist(); update(); });
       num.addEventListener('keydown', e => { if (e.key === 'Enter') num.blur(); });
@@ -2813,7 +2853,7 @@
     function rampBlock(ramp, title, sub) {
       const wrap = el('div', { style: 'margin-top:24px' });
       wrap.append(el('div', { class: 'between', style: 'margin-bottom:8px' }, [
-        el('div', { class: 'rowb' }, [el('h3', { text: title }), el('span', { class: 'ms mut tnum', text: sub || '' })]),
+        el('div', { class: 'rowb' }, [el('h3', { text: title }), el('span', { class: 'ms mut', text: sub || '' })]),
         el('button', { class: 'btn ghost', text: 'Copy ramp', onclick: () => copy(ramp.stops.map(s => s.hex).join(', '), 'Ramp') })
       ]));
       wrap.append(stripFor(ramp, title));
@@ -3018,7 +3058,7 @@
         box.append(el('div', { class: 'eyebrow', style: 'margin-bottom:8px', text: lbl }));
         ['brand', 'error', 'success', 'neutral'].forEach(k => {
           const r = set[k]; if (!r) return;
-          box.append(el('div', { class: 'ms mut tnum', style: 'margin:10px 0 4px', text: RAMP_LABEL[k] || k }));
+          box.append(el('div', { class: 'ms mut', style: 'margin:10px 0 4px', text: RAMP_LABEL[k] || k }));
           box.append(stripFor(r, (RAMP_LABEL[k] || k) + ' ' + lbl));
         });
         ld.append(box);
@@ -3362,13 +3402,31 @@
     }
 
     /* ========================= 11. render root ========================= */
-    let raf = null;
+    let raf = null, dragging = false, lastHeavy = 0, heavyCost = 0, trailing = null;
     function render(full) {
       if (full !== false) { build(); renderSidebar(); renderWorkspace(); renderInspector(); persist(); return; }
       if (raf) return;
       raf = requestAnimationFrame(() => {
         raf = null; build();
+        /* Rebuilding the workspace recreates ~1250 nodes. That is fine once and
+           ruinous at 60Hz — it is what made dragging feel stiff, not the easing.
+           While a thumb is held we back off in proportion to what the rebuild
+           actually costs on this machine: a fast one never skips a frame, a slow
+           one stops fighting the pointer for the main thread. The thumb, its
+           gradient and its readout are written synchronously in update(), so the
+           control itself stays 1:1 with the cursor either way. */
+        const now = performance.now();
+        if (dragging && heavyCost > 6 && now - lastHeavy < heavyCost * 3) {
+          // guarantee the skipped frame still lands if the pointer goes still
+          clearTimeout(trailing);
+          trailing = setTimeout(() => render(false), heavyCost * 3);
+          persist(); return;
+        }
+        clearTimeout(trailing); trailing = null;
+        lastHeavy = now;
+        const t0 = performance.now();
         renderSidebar(); renderWorkspace();
+        heavyCost = performance.now() - t0;
         $('#inspBody').querySelectorAll('.sl,.livesync').forEach(s => s.update && s.update());
         persist();
       });
@@ -3450,7 +3508,8 @@
     }
     $('#btnTheme').addEventListener('click', () => {
       S.theme = document.documentElement.classList.contains('dark') ? 'light' : 'dark';
-      applyTheme(true); persist();
+      S.pvTheme = S.theme;
+      applyTheme(true); renderPreview(); persist();
     });
 
     /* cvd */
@@ -3514,7 +3573,7 @@
             style: 'background:' + hex, 'aria-label': 'Adopt ' + hex,
             onclick: () => { S.brand = hex; S.intensity = null; S.lift = null; S.locks = {}; render(); toast('Brand set to ' + hex); }
           },
-            [el('span', { class: 'tnum', text: hex })])));
+            [el('span', { text: hex })])));
       };
       img.src = URL.createObjectURL(f);
     });
