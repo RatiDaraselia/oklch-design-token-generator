@@ -3202,6 +3202,7 @@
     }
     addEventListener('resize', syncSegPill);
     function renderExport() {
+      document.documentElement.style.setProperty('--code-name', at(MODEL.ramps.brand, 500).hex);
       $('#segFmt').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.v === S.fmt)));
       $('#btnP3').setAttribute('aria-pressed', String(!!S.p3));
       $('#btnP3').textContent = (S.p3 ? 'Remove' : 'Include') + ' P3 upgrade block';
