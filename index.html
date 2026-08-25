@@ -259,7 +259,8 @@
       gap: 12px;
       padding: 0 16px;
       background: var(--bg-page);
-      border-bottom: 1px solid #A1A1A1
+      border-bottom: 1px solid #ebebeb;
+      grid-column: 1 / -1;
     }
 
     .crumb {
@@ -314,8 +315,8 @@
     .side,
     .insp {
       position: sticky;
-      top: 0;
-      height: 100vh;
+      top: 56px;
+      height: calc(100vh - 56px);
       margin: 0;
       border-radius: 0;
       background: var(--fig-panel);
@@ -325,11 +326,11 @@
     }
 
     .side {
-      border-right: 1px solid #a1a1a1;
+      border-right: 1px solid #ebebeb;
     }
 
     .insp {
-      border-left: 1px solid #a1a1a1;
+      border-left: 1px solid #ebebeb;
     }
 
     .side-scroll,
@@ -1893,6 +1894,25 @@
   </svg>
 
   <div class="app" id="app">
+    <header class="hdr">
+      <button class="iconbtn hamb" id="hamb" aria-label="Toggle sidebar"><span data-bx="menu"></span></button>
+      <div class="crumb"><span>Systems</span><span>/</span><b id="crumb">Untitled system</b></div>
+      <div class="grow"></div>
+      <div class="row" style="gap:4px">
+        <button class="iconbtn" id="btnCvd" aria-label="Color vision simulation"
+          title="Color vision simulation"><span data-bx="eye"></span></button>
+        <button class="iconbtn themebtn" id="btnTheme" aria-label="Toggle dark mode" title="Toggle dark mode">
+          <span class="themeicon">
+            <span class="i-moon" data-bx="moon"></span>
+            <span class="i-sun" data-bx="sun"></span>
+          </span>
+        </button>
+        <button class="iconbtn" id="btnShare" aria-label="Copy share link"
+          title="Copy share link"><span data-bx="share"></span></button>
+        <button class="iconbtn" id="btnExport" aria-label="Go to export"
+          title="Export"><span data-bx="code"></span></button>
+      </div>
+    </header>
     <aside class="side" id="side" data-open="0">
       <div class="side-scroll">
         <div class="sb">
@@ -1943,25 +1963,6 @@
     </aside>
 
     <div class="center">
-      <header class="hdr">
-        <button class="iconbtn hamb" id="hamb" aria-label="Toggle sidebar"><span data-bx="menu"></span></button>
-        <div class="crumb"><span>Systems</span><span>/</span><b id="crumb">Untitled system</b></div>
-        <div class="grow"></div>
-        <div class="row" style="gap:4px">
-          <button class="iconbtn" id="btnCvd" aria-label="Color vision simulation"
-            title="Color vision simulation"><span data-bx="eye"></span></button>
-          <button class="iconbtn themebtn" id="btnTheme" aria-label="Toggle dark mode" title="Toggle dark mode">
-            <span class="themeicon">
-              <span class="i-moon" data-bx="moon"></span>
-              <span class="i-sun" data-bx="sun"></span>
-            </span>
-          </button>
-          <button class="iconbtn" id="btnShare" aria-label="Copy share link"
-            title="Copy share link"><span data-bx="share"></span></button>
-          <button class="iconbtn" id="btnExport" aria-label="Go to export"
-            title="Export"><span data-bx="code"></span></button>
-        </div>
-      </header>
       <main>
         <div class="col">
           <h1>Color system</h1>
