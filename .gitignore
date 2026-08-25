@@ -20,8 +20,4 @@ npm-debug.log*
 .env
 .env.local
 
-# Upstream icon sources used to author the sidebar design. The icons that the
-# page actually uses are inlined in index.html, so these are reference material
-# only — 44MB, and boxicons carries its own nested .git.
-boxicons (main iconset)/
-logos-main (platforms:companies)/
+

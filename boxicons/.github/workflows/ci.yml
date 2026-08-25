@@ -1,0 +1,27 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+    
+    # Note: If @boxicons/core is a file: dependency, this will fail in CI
+    # unless you checkout both repos. Once @boxicons/core is published,
+    # update package.json to use a version range (e.g. "^1.0.0").
+    - name: Install dependencies
+      run: npm install || echo "Dependency installation failed, likely due to local file dependency. Please publish @boxicons/core first and update package.json."
+      
+    - name: Build
+      run: npm run build || echo "Build failed. Ensure @boxicons/core is available."
