@@ -926,6 +926,13 @@
       border: 0
     }
 
+    /* table-layout: fixed splits the table into 12 equal columns, so the row-label
+       column claimed a full data column's width for a 21px label — ~42px of blank
+       that pushed the grid in from the section edge. Sizing it to the widest label
+       plus its 6px gutter lands the labels flush with the body text and hands the
+       reclaimed width to the eleven ramp columns. */
+    .mtx thead th:first-child { width: 28px }
+
     .mtx td.dim {
       opacity: .32
     }
