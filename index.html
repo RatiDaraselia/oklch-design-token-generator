@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,100..900&family=JetBrains+Mono:wght@400;500&display=swap"
     rel="stylesheet">
   <style>
     :root {
@@ -61,7 +61,9 @@
       --shadow-lg: 0 0 0 0.5px rgb(0 0 0 / .08), 0 1px 1px -.5px rgb(0 0 0 / .06), 0 3px 3px -1.5px rgb(0 0 0 / .04), 0 6px 6px -3px rgb(0 0 0 / .02);
       --swatch-ring: transparent;
       --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-      --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+      /* the one place a monospace face still earns its keep: the generated
+         code snippet in Export, where column alignment is the point. */
+      --font-code: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
       --fast: 120ms cubic-bezier(.2, 0, 0, 1);
       --med: 180ms cubic-bezier(.2, 0, 0, 1);
       --slow: 240ms cubic-bezier(.2, 0, 0, 1);
@@ -115,16 +117,21 @@
       line-height: 1.65;
       font-weight: 400;
       font-feature-settings: 'cv05' 1, 'ss03' 1;
+      font-optical-sizing: auto;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
     }
 
-    .mono,
-    input.mono,
-    .mono * {
-      font-family: var(--font-mono);
-      font-variant-numeric: tabular-nums;
-      font-feature-settings: 'tnum' 1
+    /* The UA stylesheet gives code/pre/kbd/samp a monospace default; the page is
+       Inter throughout, so override it at the source rather than per-component. */
+    code, kbd, samp, pre { font-family: var(--font-sans) }
+
+    /* Tabular figures. Formerly a monospace face; the page is Inter throughout
+       now, so this only locks digit width so numeric columns still align. */
+    .tnum,
+    input.tnum,
+    .tnum * {
+      font-variant-numeric: tabular-nums
     }
 
     h1,
@@ -526,7 +533,7 @@
       border-radius: 4px;
       background: var(--bg-subtle);
       font-size: 12px;
-      font-family: var(--font-mono);
+      font-family: var(--font-sans);
       font-variant-numeric: tabular-nums
     }
 
@@ -571,7 +578,7 @@
       background: none;
       height: 38px;
       padding: 0;
-      font-family: var(--font-mono);
+      font-family: var(--font-sans);
       font-variant-numeric: tabular-nums;
       font-size: 13px;
       width: 100%
@@ -668,7 +675,7 @@
     }
 
     .sigread span:last-child {
-      font-family: var(--font-mono);
+      font-family: var(--font-sans);
       font-variant-numeric: tabular-nums;
       font-size: 12px
     }
@@ -695,7 +702,7 @@
 
     .strip .stop .n,
     .strip .stop .h {
-      font-family: var(--font-mono);
+      font-family: var(--font-sans);
       font-variant-numeric: tabular-nums;
       font-size: 12px;
       line-height: 1.5
@@ -752,28 +759,28 @@
 
     .vramp .vstop .n {
       width: 36px;
-      font-family: var(--font-mono);
+      font-family: var(--font-sans);
       font-size: 13px;
       font-variant-numeric: tabular-nums
     }
 
     .vramp .vstop .hx {
       width: 80px;
-      font-family: var(--font-mono);
+      font-family: var(--font-sans);
       font-size: 13px;
       font-variant-numeric: tabular-nums
     }
 
     .vramp .vstop .ok {
       flex: 1;
-      font-family: var(--font-mono);
+      font-family: var(--font-sans);
       font-size: 12px;
       font-variant-numeric: tabular-nums;
       opacity: .85
     }
 
     .vramp .vstop .cr {
-      font-family: var(--font-mono);
+      font-family: var(--font-sans);
       font-size: 12px;
       font-variant-numeric: tabular-nums;
       opacity: .85
@@ -826,7 +833,7 @@
       width: 74px;
       height: 24px;
       text-align: right;
-      font-family: var(--font-mono);
+      font-family: var(--font-sans);
       font-size: 12px;
       font-variant-numeric: tabular-nums;
       border-radius: 8px;
@@ -884,7 +891,7 @@
 
     .sl .foot {
       margin-top: 8px;
-      font-family: var(--font-mono);
+      font-family: var(--font-sans);
       font-size: 12px;
       font-variant-numeric: tabular-nums;
       color: var(--text-secondary)
@@ -903,7 +910,7 @@
 
     .mtx th,
     .mtx td {
-      font-family: var(--font-mono);
+      font-family: var(--font-sans);
       font-variant-numeric: tabular-nums;
       font-size: 11px;
       text-align: center;
@@ -954,7 +961,7 @@
     }
 
     .tbl td.m {
-      font-family: var(--font-mono);
+      font-family: var(--font-sans);
       font-variant-numeric: tabular-nums;
       font-size: 12px
     }
@@ -1045,7 +1052,8 @@
     .code pre {
       margin: 0;
       padding: 16px;
-      font-family: var(--font-mono);
+      font-family: var(--font-code);
+      font-variant-numeric: tabular-nums;
       font-size: 13px;
       line-height: 1.6;
       overflow: auto;
@@ -1192,7 +1200,8 @@
       right: 0;
       bottom: 0;
       padding: 3px 4px;
-      font-family: var(--font-mono);
+      font-family: var(--font-sans);
+      font-variant-numeric: tabular-nums;
       font-size: 11px;
       background: rgb(255 255 255 / .82);
       color: #1b1b1b
@@ -1429,9 +1438,9 @@
       width: 24px; height: 24px; border-radius: 4px; border: 0;
       box-shadow: inset 0 0 0 1px var(--swatch-ring)
     }
-    .side .brandfield input { height: 38px; font-family: var(--font-mono); font-size: 13px; line-height: 13px; color: var(--fig-value) }
+    .side .brandfield input { height: 38px; font-family: var(--font-sans); font-size: 13px; line-height: 13px; color: var(--fig-value) }
     .side #bfmt {
-      font-family: var(--font-mono); font-size: 12px; line-height: 12px;
+      font-family: var(--font-sans); font-size: 12px; line-height: 12px;
       text-transform: uppercase; color: var(--fig-dim)
     }
 
@@ -1461,7 +1470,7 @@
       font-family: var(--font-sans); font-size: 12px; line-height: 12px; color: var(--fig-muted)
     }
     .side .sigread span:last-child, .insp .sigread span:last-child {
-      font-family: var(--font-mono); font-size: 12px; line-height: 12px; color: var(--fig-value)
+      font-family: var(--font-sans); font-size: 12px; line-height: 12px; color: var(--fig-value)
     }
 
     /* ramp navigation */
@@ -1516,7 +1525,7 @@
     .insp .hexfield {
       width: 100%; height: 32px; padding: 0 12px; background: var(--fig-field);
       border: .5px solid var(--fig-border); border-radius: 8px;
-      font-family: var(--font-mono); font-size: 12px; color: var(--fig-num)
+      font-family: var(--font-sans); font-size: 12px; color: var(--fig-num)
     }
 
     /* slider — ONE spec, shared by the inspector, the Family signature card,
@@ -1543,7 +1552,7 @@
     .sl .top input {
       width: 72px; height: 28px; padding: 0 12px; flex: none; text-align: center;
       background: var(--fig-field); border: .5px solid var(--fig-border); border-radius: 8px;
-      font-family: var(--font-mono); font-size: 12px; line-height: 14px; color: var(--fig-num)
+      font-family: var(--font-sans); font-size: 12px; line-height: 14px; color: var(--fig-num)
     }
     .sl .trackrow { margin-top: 4px; height: 24px }
     .sl .track { height: 6px; border-radius: 999px }
@@ -1557,7 +1566,7 @@
       box-shadow: 0 1px 2px rgb(0 0 0 / .2), 0 4px 12px rgb(0 0 0 / .2)
     }
     .sl .foot {
-      margin-top: 0; font-family: var(--font-mono); font-size: 12px; line-height: 14px; color: var(--fig-foot)
+      margin-top: 0; font-family: var(--font-sans); font-size: 12px; line-height: 14px; color: var(--fig-foot)
     }
 
     /* readout chips in the Family signature card, on the same field metrics */
@@ -1643,9 +1652,13 @@
     .code pre {
       margin: 0; padding: 12px 20px; border-radius: 12px; background: var(--code-surface);
       box-shadow: 0 2px 0 0 rgb(0 0 0 / .03), 0 1px 2px 0 rgb(0 0 0 / .05), 0 6px 10px 0 rgb(0 0 0 / .02);
-      font-family: var(--font-mono); font-size: 14px; line-height: 20px;
+      font-family: var(--font-code); font-variant-numeric: tabular-nums;
+      font-size: 14px; line-height: 20px;
       white-space: pre; tab-size: 2; overflow: auto; max-height: 420px; color: var(--code-fg)
     }
+    /* the snippet lives in a <code> inside the <pre>, and the UA-default reset
+       above matches it directly — so it has to be told to follow its parent. */
+    .code pre code { font-family: inherit }
     .code pre .kw, :root.dark .code pre .kw { color: var(--code-name) }
     .code pre .st { color: var(--code-val) }
     .code pre .cm { color: var(--code-punc) }
@@ -1656,7 +1669,7 @@
     .prose p + p { margin-top: 16px }
     .prose strong { font-weight: 600; color: var(--text-primary) }
     .prose code {
-      font-family: var(--font-mono); font-size: .9em; padding: 2px 6px; border-radius: 6px;
+      font-family: var(--font-sans); font-size: .9em; padding: 2px 6px; border-radius: 6px;
       background: var(--bg-subtle); color: var(--text-primary);
       font-variant-numeric: tabular-nums; white-space: nowrap
     }
@@ -1831,9 +1844,9 @@
             <div class="sb-grp g8 mid">
               <div class="brandfield">
                 <span class="sw" id="bsw"></span>
-                <input id="binput" class="mono" type="text" value="#5b93eb" spellcheck="false"
+                <input id="binput" class="tnum" type="text" value="#5b93eb" spellcheck="false"
                   aria-label="Brand color value">
-                <span class="mono" id="bfmt">hex</span>
+                <span class="tnum" id="bfmt">hex</span>
               </div>
               <div class="rule32"></div>
               <div class="sb-grp g6">
@@ -2053,7 +2066,7 @@
             <h2>Analyze an existing palette</h2>
             <p class="sm sec">Paste hex values to read their structure, then harmonize them onto one signature while
               keeping each hue’s identity.</p>
-            <textarea id="anIn" rows="3" class="mono" spellcheck="false"
+            <textarea id="anIn" rows="3" class="tnum" spellcheck="false"
               placeholder="#2c80f6, #ca252d, #21863c, #93661c"></textarea>
             <div class="row" style="margin-top:8px; gap:8px">
               <button class="btn sec" id="btnAn">Analyze</button>
@@ -2098,7 +2111,7 @@
             </div>
           </section>
 
-          <p class="cap mut mono" id="mathTest" style="margin-top:-24px"></p>
+          <p class="cap mut tnum" id="mathTest" style="margin-top:-24px"></p>
         </div>
           <aside class="toc-rail" aria-label="On this page">
             <div class="toc-head">
@@ -2589,7 +2602,7 @@
     function slider(cfg) {
       // cfg: {label, min, max, unit, step, dec, get, set, domainMax, reach, grad}
       const wrap = el('div', { class: 'sl' });
-      const num = el('input', { type: 'text', class: 'mono', 'aria-label': cfg.label });
+      const num = el('input', { type: 'text', class: 'tnum', 'aria-label': cfg.label });
       const top = el('div', { class: 'top' }, [el('label', { text: cfg.label }), num]);
       const reachTrack = el('div', { class: 'track reach', tabindex: '0', role: 'slider' });
       const thumb = el('div', { class: 'thumb' });
@@ -2717,7 +2730,7 @@
     function rampBlock(ramp, title, sub) {
       const wrap = el('div', { style: 'margin-top:24px' });
       wrap.append(el('div', { class: 'between', style: 'margin-bottom:8px' }, [
-        el('div', { class: 'rowb' }, [el('h3', { text: title }), el('span', { class: 'ms mut mono', text: sub || '' })]),
+        el('div', { class: 'rowb' }, [el('h3', { text: title }), el('span', { class: 'ms mut tnum', text: sub || '' })]),
         el('button', { class: 'btn ghost', text: 'Copy ramp', onclick: () => copy(ramp.stops.map(s => s.hex).join(', '), 'Ramp') })
       ]));
       wrap.append(stripFor(ramp, title));
@@ -2920,7 +2933,7 @@
         box.append(el('div', { class: 'eyebrow', style: 'margin-bottom:8px', text: lbl }));
         ['brand', 'error', 'success', 'neutral'].forEach(k => {
           const r = set[k]; if (!r) return;
-          box.append(el('div', { class: 'ms mut mono', style: 'margin:10px 0 4px', text: RAMP_LABEL[k] || k }));
+          box.append(el('div', { class: 'ms mut tnum', style: 'margin:10px 0 4px', text: RAMP_LABEL[k] || k }));
           box.append(stripFor(r, (RAMP_LABEL[k] || k) + ' ' + lbl));
         });
         ld.append(box);
@@ -2976,8 +2989,8 @@
       [['build-4821', '1m 12s', 'success', 'Passed'], ['build-4820', '58s', 'error', 'Failed'],
       ['build-4819', '2m 04s', 'warning', 'Flaky'], ['build-4818', '1m 33s', 'info', 'Queued']].forEach(row => {
         tb.append(el('tr', {}, [
-          el('td', { class: 'm', style: 'border-color:' + line + ';font-family:var(--font-mono);font-size:12px', text: row[0] }),
-          el('td', { style: 'border-color:' + line + ';font-family:var(--font-mono);font-size:12px;color:' + tx2, text: row[1] }),
+          el('td', { class: 'm', style: 'border-color:' + line + ';font-family:var(--font-sans);font-size:12px', text: row[0] }),
+          el('td', { style: 'border-color:' + line + ';font-family:var(--font-sans);font-size:12px;color:' + tx2, text: row[1] }),
           el('td', { style: 'border-color:' + line }, [pill(row[2], row[3])])
         ]));
       });
@@ -3163,7 +3176,7 @@
       /* head — swatch, stop name, editable hex */
       const swatchEl = el('span', { id: 'inspector-swatch', class: 'isw', style: 'background-color:' + st.hex });
       const paintSwatch = hex => { swatchEl.style.backgroundColor = hex; };
-      const hexInput = el('input', { type: 'text', class: 'mono hexfield', 'aria-label': 'Hex value' });
+      const hexInput = el('input', { type: 'text', class: 'tnum hexfield', 'aria-label': 'Hex value' });
       hexInput.value = okHex(cur());
       const flagInvalid = bad => {
         hexInput.style.borderColor = bad ? '#dc2626' : '';
@@ -3421,7 +3434,7 @@
             style: 'background:' + hex, 'aria-label': 'Adopt ' + hex,
             onclick: () => { S.brand = hex; S.intensity = null; S.lift = null; S.locks = {}; render(); toast('Brand set to ' + hex); }
           },
-            [el('span', { class: 'mono', text: hex })])));
+            [el('span', { class: 'tnum', text: hex })])));
       };
       img.src = URL.createObjectURL(f);
     });
