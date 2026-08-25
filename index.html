@@ -997,57 +997,47 @@
     .ban {
       display: flex;
       gap: 8px;
-      padding: 12px 16px;
+      padding: 16px;
       border-radius: 10px;
       align-items: flex-start;
       margin-top: 8px
     }
 
+    .ban > span {
+      display: flex;
+      align-items: center;
+      height: 20px;
+      flex: none
+    }
+
+    .ban > div {
+      display: flex;
+      flex-direction: column;
+      gap: 8px
+    }
+
     .ban .t {
       font-size: 13px;
-      font-weight: 500
+      font-weight: 500;
+      line-height: 20px
     }
 
     .ban .b {
       font-size: 13px;
-      color: var(--text-secondary)
+      color: var(--fig-label)
     }
 
-    .ban.err {
-      background: var(--e50);
-      border: 1px solid var(--e100)
-    }
+    .ban.err { background: var(--e50) }
+    .ban.err svg { color: var(--e700) }
 
-    .ban.err svg {
-      color: var(--e700)
-    }
+    .ban.warn { background: var(--w50) }
+    .ban.warn svg { color: var(--w700) }
 
-    .ban.warn {
-      background: var(--w50);
-      border: 1px solid var(--w100)
-    }
+    .ban.ok { background: var(--s50) }
+    .ban.ok svg { color: var(--s700) }
 
-    .ban.warn svg {
-      color: var(--w700)
-    }
-
-    .ban.ok {
-      background: var(--s50);
-      border: 1px solid var(--s100)
-    }
-
-    .ban.ok svg {
-      color: var(--s700)
-    }
-
-    .ban.info {
-      background: var(--bg-subtle);
-      border: 1px solid var(--border)
-    }
-
-    .ban.info svg {
-      color: var(--text-secondary)
-    }
+    .ban.info { background: var(--bg-subtle) }
+    .ban.info svg { color: var(--text-secondary) }
 
     /* code block */
     .code {
