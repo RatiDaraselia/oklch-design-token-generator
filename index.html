@@ -823,10 +823,27 @@
 
     .vramp .vstop .ok {
       justify-self: end;
+      display: flex;
+      gap: 12px;
       font-family: var(--font-sans);
-      white-space: pre;
       font-size: 12px;
       opacity: .85
+    }
+
+    .vramp .vstop .ok .pair {
+      display: flex;
+      gap: 4px;
+    }
+
+    .vramp .vstop .ok .lbl {
+      width: 10px;
+      text-align: center;
+    }
+
+    .vramp .vstop .ok .val {
+      font-variant-numeric: tabular-nums;
+      width: 36px;
+      text-align: right;
     }
 
     .vramp .vstop .acts {
@@ -2951,7 +2968,11 @@
         }, [
           el('span', { class: 'n', text: String(st.step) }),
           el('span', { class: 'hx', text: st.hex }),
-          el('span', { class: 'ok', text: 'L ' + fx(st.L, 3).padEnd(5, '0') + '   C ' + fx(st.C, 3).padEnd(5, '0') + '   H ' + fx(st.H, 1).padStart(5, ' ') + '   ' + (fx(satPct(st.L, st.C, st.H) * 100, 0) + '%').padStart(4, ' ') }),
+          el('span', { class: 'ok' }, [
+            el('span', { class: 'pair' }, [el('span', { class: 'lbl', text: 'L' }), el('span', { class: 'val', text: fx(st.L, 3).padEnd(5, '0') })]),
+            el('span', { class: 'pair' }, [el('span', { class: 'lbl', text: 'C' }), el('span', { class: 'val', text: fx(st.C, 3).padEnd(5, '0') })]),
+            el('span', { class: 'pair' }, [el('span', { class: 'lbl', text: 'H' }), el('span', { class: 'val', text: fx(st.H, 1) })])
+          ]),
           el('span', { class: 'acts', 'data-on': st.locked ? '1' : '0' }, [
             el('span', {
               role: 'button', tabindex: '0', title: st.locked ? 'Unlock' : 'Lock', html: st.locked ? ICON.lock : ICON.unlock,
