@@ -705,35 +705,66 @@
     }
 
     /* ramps */
+    .strip-wrap {
+      display: flex;
+      flex-direction: column;
+      width: 100%
+    }
+
+    .strip-head {
+      display: grid;
+      grid-template-columns: repeat(11, 1fr);
+      margin-bottom: 6px;
+    }
+
+    .strip-head .n {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
     .strip {
       display: grid;
       grid-template-columns: repeat(11, 1fr);
       border-radius: 8px;
-      overflow: hidden
+      overflow: visible; /* so tooltips can bleed */
     }
 
     .strip .stop {
-      height: 72px;
+      height: 56px;
       position: relative;
       display: flex;
       flex-direction: column;
-      justify-content: space-between;
-      padding: 8px;
+      justify-content: center;
+      align-items: center;
+      padding: 0;
       cursor: pointer;
       border: 0;
       box-shadow: inset 0 0 0 1px var(--swatch-ring)
     }
 
-    .strip .stop .n,
-    .strip .stop .h {
-      font-family: var(--font-sans);
-      font-size: 12px;
-      line-height: 1.5
+    .strip .stop .tooltip {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text-primary);
+      padding: 4px 8px;
+      border-radius: 6px;
+      font-family: var(--font-code);
+      font-size: 11px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity var(--fast);
+      z-index: 10;
+      box-shadow: var(--shadow);
     }
 
-    .strip .stop .h {
-      font-size: 11px;
-      opacity: .9
+    .strip .stop:hover .tooltip {
+      opacity: 1;
     }
 
     .strip .stop[data-sel="1"] {
@@ -2882,18 +2913,24 @@
       neutral: 'Neutral', warm: 'Warm neutral', cool: 'Cool neutral'
     };
     function stripFor(ramp, name) {
+      const wrap = el('div', { class: 'strip-wrap' });
+      
+      const head = el('div', { class: 'strip-head' });
+      ramp.stops.forEach(st => {
+        head.appendChild(el('div', { class: 'n', text: String(st.step) }));
+      });
+      wrap.appendChild(head);
+
       const strip = el('div', { class: 'strip' });
       ramp.stops.forEach(st => {
         const sel = S.sel.ramp === ramp.id && S.sel.step === st.step;
         const fg = textOn(st.hex, ramp);
+        const tt = el('div', { class: 'tooltip', text: st.hex });
         const b = el('button', {
           class: 'stop', style: 'background:' + st.hex + ';color:' + fg, 'data-sel': sel ? '1' : '0',
           'aria-label': (name || ramp.id) + ' ' + st.step + ' ' + st.hex,
           onclick: () => { S.sel = { ramp: ramp.id, step: st.step }; render(); persist(); }
-        }, [
-          el('div', { class: 'n', text: String(st.step) }),
-          el('div', { class: 'h', text: st.hex.replace('#', '') })
-        ]);
+        }, [tt]);
         const lk = el('span', {
           class: 'lk', 'data-on': st.locked ? '1' : '0', role: 'button', tabindex: '0',
           title: st.locked ? 'Unlock stop' : 'Lock stop', html: st.locked ? ICON.lock : ICON.unlock,
@@ -2902,7 +2939,8 @@
         b.appendChild(lk);
         strip.appendChild(b);
       });
-      return strip;
+      wrap.appendChild(strip);
+      return wrap;
     }
     function toggleLock(id, st) {
       const k = id + ':' + st.step;
