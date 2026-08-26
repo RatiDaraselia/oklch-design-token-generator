@@ -800,7 +800,7 @@
     .vramp .vstop {
       height: 72px;
       display: grid;
-      grid-template-columns: 48px 60px 1fr;
+      grid-template-columns: 48px 1fr;
       align-items: center;
       padding: 0 24px;
       width: 100%;
@@ -823,30 +823,6 @@
     .vramp .vstop .hx {
       font-family: var(--font-sans);
       font-size: 13px;
-    }
-
-    .vramp .vstop .ok {
-      justify-self: end;
-      display: flex;
-      gap: 12px;
-      font-family: var(--font-sans);
-      font-size: 12px;
-      opacity: 1
-    }
-
-    .vramp .vstop .ok .pair {
-      display: flex;
-      gap: 4px;
-    }
-
-    .vramp .vstop .ok .lbl {
-      width: 10px;
-      text-align: center;
-    }
-
-    .vramp .vstop .ok .val {
-      font-variant-numeric: tabular-nums;
-      width: 36px;
       text-align: right;
     }
 
@@ -2958,12 +2934,7 @@
           'aria-label': 'Brand ' + st.step + ' ' + st.hex
         }, [
           el('span', { class: 'n', text: String(st.step) }),
-          el('span', { class: 'hx', text: st.hex }),
-          el('span', { class: 'ok' }, [
-            el('span', { class: 'pair' }, [el('span', { class: 'lbl', text: 'L' }), el('span', { class: 'val', text: fx(st.L, 3).padEnd(5, '0') })]),
-            el('span', { class: 'pair' }, [el('span', { class: 'lbl', text: 'C' }), el('span', { class: 'val', text: fx(st.C, 3).padEnd(5, '0') })]),
-            el('span', { class: 'pair' }, [el('span', { class: 'lbl', text: 'H' }), el('span', { class: 'val', text: fx(st.H, 1) })])
-          ])
+          el('span', { class: 'hx', text: st.hex })
         ]);
         box.appendChild(row);
       });
