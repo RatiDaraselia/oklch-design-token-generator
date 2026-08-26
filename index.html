@@ -797,9 +797,9 @@
     .vramp .vstop {
       height: 72px;
       display: grid;
-      grid-template-columns: 48px 60px 1fr 56px;
+      grid-template-columns: 48px 60px 1fr;
       align-items: center;
-      padding: 0 16px 0 24px;
+      padding: 0 24px;
       width: 100%;
       border: 0;
       cursor: pointer;
@@ -844,19 +844,6 @@
       font-variant-numeric: tabular-nums;
       width: 36px;
       text-align: right;
-    }
-
-    .vramp .vstop .acts {
-      display: flex;
-      gap: 4px;
-      justify-content: flex-end;
-      opacity: 0;
-      transition: opacity var(--fast)
-    }
-
-    .vramp .vstop:hover .acts,
-    .vramp .vstop .acts[data-on="1"] {
-      opacity: 1
     }
 
     .rampmeta {
@@ -2972,16 +2959,6 @@
             el('span', { class: 'pair' }, [el('span', { class: 'lbl', text: 'L' }), el('span', { class: 'val', text: fx(st.L, 3).padEnd(5, '0') })]),
             el('span', { class: 'pair' }, [el('span', { class: 'lbl', text: 'C' }), el('span', { class: 'val', text: fx(st.C, 3).padEnd(5, '0') })]),
             el('span', { class: 'pair' }, [el('span', { class: 'lbl', text: 'H' }), el('span', { class: 'val', text: fx(st.H, 1) })])
-          ]),
-          el('span', { class: 'acts', 'data-on': st.locked ? '1' : '0' }, [
-            el('span', {
-              role: 'button', tabindex: '0', title: st.locked ? 'Unlock' : 'Lock', html: st.locked ? ICON.lock : ICON.unlock,
-              onclick: ev => { ev.stopPropagation(); toggleLock(ramp.id, st); }
-            }),
-            el('span', {
-              role: 'button', tabindex: '0', title: 'Copy hex', html: ICON.copy,
-              onclick: ev => { ev.stopPropagation(); copy(st.hex, st.hex); }
-            })
           ])
         ]);
         box.appendChild(row);
