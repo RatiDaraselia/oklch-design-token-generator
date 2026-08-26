@@ -714,14 +714,14 @@
     .strip-head {
       display: grid;
       grid-template-columns: repeat(11, 1fr);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .strip-head .n {
       font-family: var(--font-sans);
       font-size: 11px;
       color: var(--text-muted);
-      text-align: center;
+      text-align: left;
     }
 
     .strip {
@@ -732,7 +732,7 @@
     }
 
     .strip .stop {
-      height: 56px;
+      aspect-ratio: 1 / 1;
       position: relative;
       display: flex;
       flex-direction: column;
@@ -2982,10 +2982,10 @@
       el('div', {}, [el('div', { class: 't', text: n.t }), el('div', { class: 'b', text: n.b })])]);
     }
     function rampBlock(ramp, title, sub) {
-      const wrap = el('div', { style: 'margin-top:24px' });
-      wrap.append(el('div', { class: 'between', style: 'margin-bottom:8px' }, [
-        el('div', { class: 'rowb' }, [el('h3', { text: title }), el('span', { class: 'ms mut', text: sub || '' })]),
-        el('button', { class: 'btn ghost', text: 'Copy ramp', onclick: () => copy(ramp.stops.map(s => s.hex).join(', '), 'Ramp') })
+      const wrap = el('div', { style: 'margin-top:32px' });
+      wrap.append(el('div', { class: 'between', style: 'margin-bottom:16px' }, [
+        el('div', { class: 'row', style: 'gap:12px' }, [el('h3', { text: title }), el('span', { class: 'ms mut', text: sub || '' })]),
+        el('button', { class: 'btn sec', text: 'Copy ramp', onclick: () => copy(ramp.stops.map(s => s.hex).join(', '), 'Ramp') })
       ]));
       wrap.append(stripFor(ramp, title));
       return wrap;
@@ -3197,7 +3197,7 @@
         box.append(el('div', { class: 'eyebrow', style: 'margin-bottom:8px', text: lbl }));
         ['brand', 'error', 'success', 'neutral'].forEach(k => {
           const r = set[k]; if (!r) return;
-          box.append(el('div', { class: 'ms mut', style: 'margin:10px 0 4px', text: RAMP_LABEL[k] || k }));
+          box.append(el('div', { class: 'ms mut', style: 'margin-top:32px; margin-bottom:16px', text: RAMP_LABEL[k] || k }));
           box.append(stripFor(r, (RAMP_LABEL[k] || k) + ' ' + lbl));
         });
         ld.append(box);
