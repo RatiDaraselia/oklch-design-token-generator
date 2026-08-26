@@ -797,9 +797,9 @@
     .vramp .vstop {
       height: 72px;
       display: grid;
-      grid-template-columns: 36px 60px 1fr auto 56px;
+      grid-template-columns: 36px 60px 1fr 56px;
       align-items: center;
-      padding: 0 16px;
+      padding: 0 16px 0 24px;
       width: 100%;
       border: 0;
       cursor: pointer;
@@ -822,16 +822,9 @@
     }
 
     .vramp .vstop .ok {
-      justify-self: center;
+      justify-self: end;
       font-family: var(--font-code);
       white-space: pre;
-      font-size: 12px;
-      opacity: .85
-    }
-
-    .vramp .vstop .cr {
-      text-align: right;
-      font-family: var(--font-sans);
       font-size: 12px;
       opacity: .85
     }
@@ -2959,7 +2952,6 @@
           el('span', { class: 'n', text: String(st.step) }),
           el('span', { class: 'hx', text: st.hex }),
           el('span', { class: 'ok', text: 'L ' + fx(st.L, 3).padEnd(5, '0') + '   C ' + fx(st.C, 3).padEnd(5, '0') + '   H ' + fx(st.H, 1).padStart(5, ' ') + '   ' + (fx(satPct(st.L, st.C, st.H) * 100, 0) + '%').padStart(4, ' ') }),
-          el('span', { class: 'cr', text: fx(contrast(st.hex, '#ffffff'), 2) + ' / ' + fx(contrast(st.hex, '#000000'), 2) }),
           el('span', { class: 'acts', 'data-on': st.locked ? '1' : '0' }, [
             el('span', {
               role: 'button', tabindex: '0', title: st.locked ? 'Unlock' : 'Lock', html: st.locked ? ICON.lock : ICON.unlock,
