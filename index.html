@@ -2619,6 +2619,16 @@
       MODEL.dark.neutral = makeRamp('neutral-dark', brand.H, { dark: true, tintPct: tint == null ? 0 : tint * 1.5 });
       return MODEL;
     }
+    /* Both the header and the Live preview toast describe the same system, so
+       they read from one place. The toast used to hard-code "11 stops x 8 ramps",
+       which was wrong the moment the accent scheme changed the ramp count. */
+    function systemShape() {
+      const R = allRamps(), n = Object.keys(R).length;
+      const stops = R.brand ? R.brand.stops.length : 0;
+      const tok = Object.keys(R).reduce((a, k) => a + R[k].stops.length, 0)
+        + (MODEL.dark.brand ? Object.keys(MODEL.dark).reduce((a, k) => a + MODEL.dark[k].stops.length, 0) : 0);
+      return n + ' ramps \u00d7 ' + stops + ' stops \u00b7 ' + tok + ' tokens';
+    }
     const allRamps = () => {
       const o = {
         brand: MODEL.ramps.brand, error: MODEL.ramps.error, warning: MODEL.ramps.warning,
@@ -3214,7 +3224,7 @@
       pv.append(el('div', { class: 'row', style: 'justify-content:flex-end' }, [
         el('div', { class: 'toast', style: 'background:' + g('success', 100) + ';border:1px solid ' + g('success', 200) + ';box-shadow:' + toastLift }, [
           el('span', { class: 'label', style: 'color:' + g('success', 800), text: 'System saved' }),
-          el('span', { class: 'ms', style: 'color:' + g('success', 700), text: '11 stops × 8 ramps' })
+          el('span', { class: 'ms', style: 'color:' + g('success', 700), text: systemShape() })
         ])
       ]));
       host.append(pv);
