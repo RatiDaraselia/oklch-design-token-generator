@@ -272,6 +272,14 @@
       color: var(--text-primary)
     }
 
+    .crumb .hdrmeta { color: var(--text-secondary) }
+    .crumb .hdrsep { color: var(--text-muted) }
+    /* the name is the identity and stays; the counts are detail, and this is
+       also the width where the sidebar collapses and the header gets tight */
+    @media (max-width: 899px) {
+      .crumb .hdrsep, .crumb .hdrmeta { display: none }
+    }
+
     .hdr .grow {
       flex: 1
     }
@@ -1931,7 +1939,11 @@
   <div class="app" id="app">
     <header class="hdr">
       <button class="iconbtn hamb" id="hamb" aria-label="Toggle sidebar"><span data-bx="menu"></span></button>
-      <div class="crumb"><span>Systems</span><span>/</span><b id="crumb">Untitled system</b></div>
+      <div class="crumb">
+        <b>OKLCH Color Generator</b>
+        <span class="hdrsep">·</span>
+        <span class="hdrmeta" id="hdrMeta"></span>
+      </div>
       <div class="grow"></div>
       <div class="row" style="gap:4px">
         <button class="iconbtn" id="btnCvd" aria-label="Color vision simulation"
@@ -3005,6 +3017,14 @@
     function renderSidebar() {
       $('#bsw').style.background = MODEL.brandHex;
       $('#bfmt').textContent = MODEL.fmt;
+      /* The header used to read "Systems / Untitled system" — a breadcrumb for a
+         hierarchy this app does not have, and an id nothing ever wrote to. It
+         reports the system's actual shape instead. No swatch or hex here: the
+         brand field sits directly below it in the sidebar showing exactly that,
+         and this is the one strip that stays put down the whole page. Ramp count
+         includes accents, so it tracks the scheme; token count is derived the
+         same way tokenList() builds the exports, so it cannot drift from them. */
+      $('#hdrMeta').textContent = systemShape();
       if (document.activeElement !== $('#binput')) $('#binput').value = S.brand;
       const B = MODEL.brand;
       const sr = $('#sigread'); sr.innerHTML = '';
