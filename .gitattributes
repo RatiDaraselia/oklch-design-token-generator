@@ -1,0 +1,10 @@
+# Upstream icon sets kept as reference material for authoring the UI. The page
+# inlines the handful of glyphs it actually uses, so nothing here is a runtime
+# dependency — but 1,882 SVGs against one 173 KB HTML file made Linguist report
+# the project as 98.8% SVG. Marking them vendored keeps them in the repo while
+# leaving the language stats describing the app itself.
+assets/logos/**    linguist-vendored
+assets/boxicons/** linguist-vendored
+
+# Single-file app: let GitHub count it as the source it is.
+index.html linguist-detectable
