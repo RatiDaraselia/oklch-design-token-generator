@@ -1930,7 +1930,15 @@
        the three black layers carry the shape (delta 10-20 against the panel) and
        the white top rim is a no-op on a white face. In dark those same black
        layers land at delta 1-2 — invisible — so the edge has to come from a light
-       rim and the cast shadow needs real weight to register at all. */
+       rim and the cast shadow needs real weight to register at all.
+
+       Hover grows the geometry, not the ink. It used to carry 2.6x the resting
+       shadow mass in light (2.15x in dark) and reach twice as far, which landed
+       as a slab under the button rather than a lift. It sits at ~1.3x in both
+       themes now: the offset and blur still open up, but the alpha barely moves,
+       so the button reads as rising instead of darkening. The rim step does the
+       rest — and in dark it is the rim, not the cast shadow, that carries the
+       edge anyway. */
     :root {
       --btn-lift:
         inset 0 1px 0 rgba(255, 255, 255, .15),
@@ -1938,10 +1946,10 @@
         0 1px 1px rgba(0, 0, 0, .08),
         0 2px 4px -1px rgba(0, 0, 0, .04);
       --btn-lift-hover:
-        inset 0 1px 0 rgba(255, 255, 255, .2),
-        0 0 0 .5px rgba(0, 0, 0, .07),
-        0 2px 3px rgba(0, 0, 0, .1),
-        0 4px 8px -2px rgba(0, 0, 0, .06);
+        inset 0 1px 0 rgba(255, 255, 255, .18),
+        0 0 0 .5px rgba(0, 0, 0, .06),
+        0 1px 2px rgba(0, 0, 0, .08),
+        0 3px 7px -2px rgba(0, 0, 0, .055);
       --btn-press:
         inset 0 1px 2px rgba(0, 0, 0, .13),
         0 0 0 .5px rgba(0, 0, 0, .08);
@@ -1953,10 +1961,10 @@
         0 1px 2px rgba(0, 0, 0, .55),
         0 3px 6px -2px rgba(0, 0, 0, .4);
       --btn-lift-hover:
-        inset 0 1px 0 rgba(255, 255, 255, .11),
-        0 0 0 .5px rgba(255, 255, 255, .14),
-        0 2px 4px rgba(0, 0, 0, .6),
-        0 5px 10px -3px rgba(0, 0, 0, .45);
+        inset 0 1px 0 rgba(255, 255, 255, .1),
+        0 0 0 .5px rgba(255, 255, 255, .13),
+        0 1px 3px rgba(0, 0, 0, .55),
+        0 4px 8px -3px rgba(0, 0, 0, .42);
       --btn-press:
         inset 0 1px 3px rgba(0, 0, 0, .6),
         0 0 0 .5px rgba(255, 255, 255, .07);
