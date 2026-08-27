@@ -1095,14 +1095,18 @@
       color: var(--text-secondary)
     }
 
+    /* A tinted card with neutral type reads as half-coloured. The 700s carry
+       the text as well as the glyph — they are the only rung of these families
+       the dark theme redefines, so they are also the only ones safe to use in
+       a themed surface. Weight still separates title from body. */
     .ban.err { background: var(--e50) }
-    .ban.err svg { color: var(--e700) }
+    .ban.err svg, .ban.err .t, .ban.err .b { color: var(--e700) }
 
     .ban.warn { background: var(--w50) }
-    .ban.warn svg { color: var(--w700) }
+    .ban.warn svg, .ban.warn .t, .ban.warn .b { color: var(--w700) }
 
     .ban.ok { background: var(--s50) }
-    .ban.ok svg { color: var(--s700) }
+    .ban.ok svg, .ban.ok .t, .ban.ok .b { color: var(--s700) }
 
     .ban.info { background: var(--bg-subtle) }
     .ban.info svg { color: var(--text-primary) }
@@ -2899,7 +2903,8 @@
       eyedropper: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"m19.41,3c-.78-.78-2.05-.78-2.83,0l-2.59,2.59-1.29-1.29-1.41,1.41,1.29,1.29L4.29,15.29c-.13.13-.22.29-.26.46l-1,4c-.08.34.01.7.26.95.19.19.45.29.71.29.08,0,.16,0,.24-.03l4-1c.18-.04.34-.13.46-.26l8.29-8.29,1.29,1.29,1.41-1.41-1.29-1.29,2.59-2.59c.78-.78.78-2.05,0-2.83l-1.59-1.59Zm-11.93,15.1l-2.11.53.53-2.11,8.1-8.1,1.59,1.59-8.1,8.1Zm9.51-9.51l-1.59-1.59,2.59-2.59,1.59,1.59-2.59,2.59Z\"/></svg>",
       image: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M5 21h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2m0-2v-1.59l3-3 1.29 1.29c.39.39 1.02.39 1.41 0l5.29-5.29 3 3V19h-14ZM19 5v5.59L16.71 8.3a.996.996 0 0 0-1.41 0l-5.29 5.29-1.29-1.29a.996.996 0 0 0-1.41 0l-2.29 2.29V5h14Z\"/><path d=\"M8.5 7a1.5 1.5 0 1 0 0 3 1.5 1.5 0 1 0 0-3\"/></svg>",
       sliderAlt: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"m6,11c1.86,0,3.41-1.28,3.86-3h12.14v-2h-12.14c-.45-1.72-2-3-3.86-3-2.21,0-4,1.79-4,4s1.79,4,4,4Zm0-6c1.1,0,2,.9,2,2s-.9,2-2,2-2-.9-2-2,.9-2,2-2Z\"/><path d=\"m18,21c2.21,0,4-1.79,4-4s-1.79-4-4-4c-1.86,0-3.41,1.28-3.86,3H2v2h12.14c.45,1.72,2,3,3.86,3Zm0-6c1.1,0,2,.9,2,2s-.9,2-2,2-2-.9-2-2,.9-2,2-2Z\"/></svg>",
-      check: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M9 15.59 4.71 11.3 3.3 12.71l5 5c.2.2.45.29.71.29s.51-.1.71-.29l11-11-1.41-1.41L9.02 15.59Z\"/></svg>"
+      check: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M9 15.59 4.71 11.3 3.3 12.71l5 5c.2.2.45.29.71.29s.51-.1.71-.29l11-11-1.41-1.41L9.02 15.59Z\"/></svg>",
+      alertTriangle: "<svg viewBox=\"0 0 24 24\" fill=\"currentColor\" xmlns=\"http://www.w3.org/2000/svg\" aria-hidden=\"true\"><path d=\"M11 9h2v6h-2zM11 17h2v2h-2z\"/><path d=\"M12.87 2.51c-.35-.63-1.4-.63-1.75 0l-9.99 18c-.17.31-.17.69.01.99.18.31.51.49.86.49h20c.35 0 .68-.19.86-.49a1 1 0 0 0 .01-.99zM3.7 20 12 5.06 20.3 20z\"/></svg>"
     };
     /* Format marks for the Export buttons: CSS3, Tailwind, JSON and DTCG.
        Deliberately NOT boxicons — these identify third-party formats, so they
@@ -2917,7 +2922,8 @@
       get unlock() { return BX.lockOpen; },
       get copy() { return BX.copy; },
       get info() { return BX.info; },
-      get check() { return BX.check; }
+      get check() { return BX.check; },
+      get alert() { return BX.alertTriangle; }
     };
 
     /* ========================= 7. sliders ========================= */
@@ -3134,7 +3140,10 @@
     }
     function banner(n) {
       const cls = n.kind === 'warn' ? 'warn' : n.kind === 'err' ? 'err' : n.kind === 'ok' ? 'ok' : 'info';
-      return el('div', { class: 'ban ' + cls }, [el('span', { html: ICON.info }),
+      // the glyph has to say the same thing the surface does — an info circle on
+      // an amber card read as a note about nothing in particular
+      const glyph = cls === 'warn' || cls === 'err' ? ICON.alert : cls === 'ok' ? ICON.check : ICON.info;
+      return el('div', { class: 'ban ' + cls }, [el('span', { html: glyph }),
       el('div', {}, [el('div', { class: 't', text: n.t }), el('div', { class: 'b', text: n.b })])]);
     }
     function rampBlock(ramp, title, sub) {
