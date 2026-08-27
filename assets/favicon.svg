@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" role="img" aria-label="OKLCH colour wheel">
+  <title>OKLCH Color Generator</title>
+  <style>
+    /* Twelve hues swept at a fixed OKLCH lightness, each at 92% of the chroma
+       that still fits sRGB at that lightness — the same fixed-L / max-C rule the
+       generator itself uses, so the mark is a sample of its own output.
+       L .60 is the crossover that clears 3.7:1 on white *and* on #1b1b1b, so the
+       icon stays readable even where prefers-color-scheme is ignored. */
+.h0{fill:#e0257b}.h1{fill:#e72d1c}.h2{fill:#b76b1d}.h3{fill:#9a7c1d}.h4{fill:#778b1e}.h5{fill:#22984c}.h6{fill:#229382}.h7{fill:#228fa0}.h8{fill:#2189c4}.h9{fill:#5471f5}.h10{fill:#994df5}.h11{fill:#cb26c5}
+    @media (prefers-color-scheme: dark) {
+      /* Nothing sits behind the spokes on a dark tab strip, so lightness can go
+         up to .74 for a richer mark without risking the light-mode case. */
+.h0{fill:#f97ba7}.h1{fill:#f98472}.h2{fill:#f28f2a}.h3{fill:#cda62a}.h4{fill:#9eb92b}.h5{fill:#31ca67}.h6{fill:#31c4ae}.h7{fill:#30bfd4}.h8{fill:#49b5f8}.h9{fill:#8da6f9}.h10{fill:#b994f9}.h11{fill:#f964f1}
+    }
+  </style>
+  <path class="h0" d="M13.1 1.079A15.2 15.2 0 0 1 18.9 1.079L17.908 6.184A10 10 0 0 0 14.092 6.184Z"/>
+  <path class="h1" d="M20.949 1.628A15.2 15.2 0 0 1 25.972 4.528L22.561 8.453A10 10 0 0 0 19.256 6.545Z"/>
+  <path class="h2" d="M27.472 6.028A15.2 15.2 0 0 1 30.372 11.051L25.455 12.744A10 10 0 0 0 23.547 9.439Z"/>
+  <path class="h3" d="M30.921 13.1A15.2 15.2 0 0 1 30.921 18.9L25.816 17.908A10 10 0 0 0 25.816 14.092Z"/>
+  <path class="h4" d="M30.372 20.949A15.2 15.2 0 0 1 27.472 25.972L23.547 22.561A10 10 0 0 0 25.455 19.256Z"/>
+  <path class="h5" d="M25.972 27.472A15.2 15.2 0 0 1 20.949 30.372L19.256 25.455A10 10 0 0 0 22.561 23.547Z"/>
+  <path class="h6" d="M18.9 30.921A15.2 15.2 0 0 1 13.1 30.921L14.092 25.816A10 10 0 0 0 17.908 25.816Z"/>
+  <path class="h7" d="M11.051 30.372A15.2 15.2 0 0 1 6.028 27.472L9.439 23.547A10 10 0 0 0 12.744 25.455Z"/>
+  <path class="h8" d="M4.528 25.972A15.2 15.2 0 0 1 1.628 20.949L6.545 19.256A10 10 0 0 0 8.453 22.561Z"/>
+  <path class="h9" d="M1.079 18.9A15.2 15.2 0 0 1 1.079 13.1L6.184 14.092A10 10 0 0 0 6.184 17.908Z"/>
+  <path class="h10" d="M1.628 11.051A15.2 15.2 0 0 1 4.528 6.028L8.453 9.439A10 10 0 0 0 6.545 12.744Z"/>
+  <path class="h11" d="M6.028 4.528A15.2 15.2 0 0 1 11.051 1.628L12.744 6.545A10 10 0 0 0 9.439 8.453Z"/>
+</svg>
