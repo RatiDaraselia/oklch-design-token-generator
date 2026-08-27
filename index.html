@@ -2764,17 +2764,26 @@
         });
         const got = dEOK(simulate(at(MODEL.ramps.error, 500).hex, 'deut'),
           simulate(at(MODEL.ramps.success, 500).hex, 'deut'));
+        /* Severity tracks the outcome, not the topic. A correction that landed
+           is something to report, not to warn about — the reader has nothing to
+           do about it. Only a correction that ran out of room asks for a
+           decision, so only that one is styled as a warning. */
         notes.push({
-          kind: 'warn', t: 'Error and success collided under deuteranopia',
+          kind: got >= 0.10 ? 'info' : 'warn',
+          t: got >= 0.10 ? 'Error separated from success for deuteranopia'
+            : 'Error and success still collide under deuteranopia',
           b: 'At one shared lightness the two read as the same colour to a deuteranope. The error ramp was walked '
             + fx(deutShift, 2) + ' L darker through its middle, easing back onto the ladder at 50 and 950 so the tints '
-            + 'stay tints, leaving the two 500 stops ΔEOK ' + fx(got, 3) + ' apart under simulation. Success keeps the ladder.'
+            + 'stay tints, leaving the two 500 stops ΔEOK ' + fx(got, 3) + ' apart under simulation'
+            + (got >= 0.10 ? ' — clear of the 0.10 threshold. Success keeps the ladder.'
+              : ', short of the 0.10 threshold. Consider moving one of the two anchor hues.')
         });
       }
 
       // role legibility: 600 vs 50 ≥ 4.5:1 — run after the deuteranopia walk, so
       // the guarantee holds at the lightness the stops actually ship at
       const fixes = [];
+      let short = false;
       ROLES.forEach(r => {
         const idx = STEPS.indexOf(600), s50 = MODEL.ramps[r].stops[0];
         // the walk may not pass the 700 stop: a ramp that stops descending is no
@@ -2788,12 +2797,14 @@
         if (walked) {
           MODEL.ramps[r].stops[idx] = st;
           const got = contrast(st.hex, s50.hex);
+          if (got < 4.5) short = true;
           fixes.push(r + ' by ' + fx(walked / 100, 2) + ' L to ' + fx(got, 2) + ':1'
             + (got < 4.5 ? ' (as far as the 700 stop allows)' : ''));
         }
       });
       if (fixes.length) notes.push({
-        kind: 'info', t: 'Contrast corrected at the 600 stop',
+        kind: short ? 'warn' : 'info',
+        t: short ? 'A 600 stop could not reach 4.5:1' : 'Contrast corrected at the 600 stop',
         b: 'These roles missed 4.5:1 against their own 50, so lightness walked down until they cleared it — ' + fixes.join(', ') + '.'
       });
 
