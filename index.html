@@ -269,9 +269,28 @@
     }
 
     .crumb b {
-      font-weight: 400;
+      font-weight: 600;
       color: var(--text-primary)
     }
+
+    /* The mark and the wordmark are one lockup, so they sit tighter than the
+       8px the crumb uses to separate name from counts. */
+    .brandmark {
+      display: flex;
+      flex: none;
+      margin-right: -2px
+    }
+
+    .brandmark svg {
+      width: 16px;
+      height: 16px;
+      display: block
+    }
+
+    /* Same twelve hues as assets/favicon.svg, keyed to the app's own theme class
+       instead of prefers-color-scheme so the mark follows the in-page toggle. */
+    .brandmark .h0{fill:#e0257b}.brandmark .h1{fill:#e72d1c}.brandmark .h2{fill:#b76b1d}.brandmark .h3{fill:#9a7c1d}.brandmark .h4{fill:#778b1e}.brandmark .h5{fill:#22984c}.brandmark .h6{fill:#229382}.brandmark .h7{fill:#228fa0}.brandmark .h8{fill:#2189c4}.brandmark .h9{fill:#5471f5}.brandmark .h10{fill:#994df5}.brandmark .h11{fill:#cb26c5}
+    :root.dark .brandmark .h0{fill:#f97ba7}:root.dark .brandmark .h1{fill:#f98472}:root.dark .brandmark .h2{fill:#f28f2a}:root.dark .brandmark .h3{fill:#cda62a}:root.dark .brandmark .h4{fill:#9eb92b}:root.dark .brandmark .h5{fill:#31ca67}:root.dark .brandmark .h6{fill:#31c4ae}:root.dark .brandmark .h7{fill:#30bfd4}:root.dark .brandmark .h8{fill:#49b5f8}:root.dark .brandmark .h9{fill:#8da6f9}:root.dark .brandmark .h10{fill:#b994f9}:root.dark .brandmark .h11{fill:#f964f1}
 
     .crumb .hdrmeta { color: var(--text-secondary) }
     .crumb .hdrsep { color: var(--text-muted) }
@@ -2043,6 +2062,25 @@
     <header class="hdr">
       <button class="iconbtn hamb" id="hamb" aria-label="Toggle sidebar"><span data-bx="menu"></span></button>
       <div class="crumb">
+        <!-- the product mark: the same wheel the favicon draws, inlined so the
+             page still shows it without the assets folder, and so its fills can
+             follow the in-page theme toggle rather than the OS setting -->
+        <span class="brandmark" aria-hidden="true">
+          <svg viewBox="0 0 32 32">
+            <path class="h0" d="M13.1 1.079A15.2 15.2 0 0 1 18.9 1.079L17.908 6.184A10 10 0 0 0 14.092 6.184Z"/>
+            <path class="h1" d="M20.949 1.628A15.2 15.2 0 0 1 25.972 4.528L22.561 8.453A10 10 0 0 0 19.256 6.545Z"/>
+            <path class="h2" d="M27.472 6.028A15.2 15.2 0 0 1 30.372 11.051L25.455 12.744A10 10 0 0 0 23.547 9.439Z"/>
+            <path class="h3" d="M30.921 13.1A15.2 15.2 0 0 1 30.921 18.9L25.816 17.908A10 10 0 0 0 25.816 14.092Z"/>
+            <path class="h4" d="M30.372 20.949A15.2 15.2 0 0 1 27.472 25.972L23.547 22.561A10 10 0 0 0 25.455 19.256Z"/>
+            <path class="h5" d="M25.972 27.472A15.2 15.2 0 0 1 20.949 30.372L19.256 25.455A10 10 0 0 0 22.561 23.547Z"/>
+            <path class="h6" d="M18.9 30.921A15.2 15.2 0 0 1 13.1 30.921L14.092 25.816A10 10 0 0 0 17.908 25.816Z"/>
+            <path class="h7" d="M11.051 30.372A15.2 15.2 0 0 1 6.028 27.472L9.439 23.547A10 10 0 0 0 12.744 25.455Z"/>
+            <path class="h8" d="M4.528 25.972A15.2 15.2 0 0 1 1.628 20.949L6.545 19.256A10 10 0 0 0 8.453 22.561Z"/>
+            <path class="h9" d="M1.079 18.9A15.2 15.2 0 0 1 1.079 13.1L6.184 14.092A10 10 0 0 0 6.184 17.908Z"/>
+            <path class="h10" d="M1.628 11.051A15.2 15.2 0 0 1 4.528 6.028L8.453 9.439A10 10 0 0 0 6.545 12.744Z"/>
+            <path class="h11" d="M6.028 4.528A15.2 15.2 0 0 1 11.051 1.628L12.744 6.545A10 10 0 0 0 9.439 8.453Z"/>
+          </svg>
+        </span>
         <b>OKLCH Color Generator</b>
         <span class="hdrsep">·</span>
         <span class="hdrmeta" id="hdrMeta"></span>
