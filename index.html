@@ -3339,7 +3339,7 @@
         ])
       ]));
 
-      pv.append(el('div', { style: 'background:' + g('warning', tintFill) + ';border:1px solid ' + g('warning', tintEdge) + ';border-radius:8px;padding:12px 16px' }, [
+      pv.append(el('div', { style: 'background:' + g('warning', tintFill) + ';border-radius:8px;padding:12px 16px' }, [
         el('div', { class: 'label', style: 'color:' + g('warning', 800), text: 'Seats are nearly full' }),
         el('div', { class: 'ms', style: 'color:' + g('warning', 700), text: 'Two seats left on the current plan.' })
       ]));
@@ -3360,7 +3360,7 @@
       pv.append(el('div', { class: 'pvcard', style: 'background:' + surf + ';border-color:' + line }, [tbl]));
 
       pv.append(el('div', { class: 'row', style: 'justify-content:flex-end' }, [
-        el('div', { class: 'toast', style: 'background:' + g('success', tintFill) + ';border:1px solid ' + g('success', tintEdge) }, [
+        el('div', { class: 'toast', style: 'background:' + g('success', tintFill) }, [
           el('span', { class: 'label', style: 'color:' + g('success', 800), text: 'System saved' }),
           el('span', { class: 'ms', style: 'color:' + g('success', 700), text: systemShape() })
         ])
