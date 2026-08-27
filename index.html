@@ -3293,7 +3293,7 @@
       const N = set.neutral || MODEL.ramps.neutral;
       const g = (r, step) => at(set[r] || MODEL.ramps[r], step).hex;
       const page = dark ? '#141414' : '#ffffff';
-      const surf = dark ? at(N, 200).hex : '#ffffff';
+      const surf = dark ? 'transparent' : '#ffffff';
       const line = dark ? at(N, 300).hex : at(N, 100).hex;
       const tx = dark ? at(N, 950).hex : at(N, 900).hex;
       const tx2 = dark ? at(N, 700).hex : at(N, 600).hex;
