@@ -1093,11 +1093,15 @@
     .ban .mk {
       display: flex;
       flex: none;
+      /* dimmed rather than recoloured: the opacity rides on whatever family
+         colour the row already has, so an amber chevron stays amber and a
+         neutral one stays neutral, both a step back from the title */
+      opacity: .45;
       transition: transform var(--med)
     }
 
     .ban[open] .mk {
-      transform: rotate(90deg)
+      transform: rotate(180deg)
     }
 
     .ban .b {
@@ -1383,7 +1387,7 @@
     }
 
     .dis[open] .mk {
-      transform: rotate(90deg)
+      transform: rotate(180deg)
     }
 
     .grid2 {
@@ -2225,7 +2229,7 @@
             <div id="semRamps"></div>
             <div id="semNotes" style="margin-top:16px"></div>
             <details class="dis sub" id="disTune">
-              <summary><span class="mk" data-bx="chevronRight"></span>Semantic tuning</summary>
+              <summary><span class="mk" data-bx="chevronDown"></span>Semantic tuning</summary>
               <div class="card">
                 <div class="grid2" id="tuneSliders"></div>
                 <hr class="bleed">
@@ -3165,7 +3169,7 @@
         el('summary', {}, [
           el('span', { class: 'bi', html: glyph }),
           el('span', { class: 't', text: n.t }),
-          el('span', { class: 'mk', html: BX.chevronRight })
+          el('span', { class: 'mk', html: BX.chevronDown })
         ]),
         el('div', { class: 'b', text: n.b })
       ]);
@@ -3321,7 +3325,13 @@
           'anchor ' + S.anchors[r] + '° → ' + fx(s.H, 1) + '° · ' + (s.pulled ? 'pulled toward brand' : 'left at anchor')));
       });
       const sn = $('#semNotes'); sn.innerHTML = '';
-      MODEL.notes.forEach(n => sn.append(banner(n)));
+      /* Loudest first. A warning is the only one of these that might want a
+         decision, so it should not sit under three routine reports. sort is
+         stable, so notes of one kind keep the order the engine raised them in. */
+      const NOTE_RANK = { err: 0, warn: 1, info: 2, ok: 3 };
+      MODEL.notes.slice()
+        .sort((a, b) => (NOTE_RANK[a.kind] ?? 2) - (NOTE_RANK[b.kind] ?? 2))
+        .forEach(n => sn.append(banner(n)));
       if (!MODEL.notes.length) sn.append(banner({ kind: 'ok', t: 'No corrections needed', b: 'Every role clears 4.5:1 at 600 against 50, all four stay ΔEOK 0.10 apart, and error and success survive deuteranopia.' }));
 
       if (!tuneBuilt && $('#disTune').open) buildTuneSliders();
