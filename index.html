@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Color system generator</title>
+  <title>OKLCH Color Generator</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3169,10 +3169,10 @@
         nodes.forEach(n => box.append(n));
         return el('div', { class: 'sb-grp' }, [el('div', { class: 'eyebrow', text: title }), box]);
       };
-      tree.append(navGroup('Ramps', [mk('brand', 'Brand', at(R.brand, 500).hex)], false));
+      tree.append(navGroup('Brand', [mk('brand', 'Brand', at(R.brand, 500).hex)], false));
       tree.append(navGroup('Semantic',
         ['error', 'warning', 'success', 'info'].map(r => mk(r, RAMP_LABEL[r], at(R[r], 500).hex)), true));
-      tree.append(navGroup('Neutral',
+      tree.append(navGroup('Neutrals',
         ['neutral', 'warm', 'cool'].map(r => mk(r, RAMP_LABEL[r], at(R[r], 500).hex)), true));
       if (MODEL.accents.length) tree.append(navGroup('Accents',
         MODEL.accents.map((r, i) => mk('accent' + (i + 1), 'Accent ' + (i + 1) + ' \u00b7 ' + fx(r.baseH, 0) + '\u00b0',
