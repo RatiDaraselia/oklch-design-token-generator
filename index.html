@@ -3273,10 +3273,10 @@
       const ld = $('#ldPair'); ld.innerHTML = '';
       [['Light', MODEL.ramps], ['Dark', MODEL.dark]].forEach(([lbl, set]) => {
         const box = el('div', {});
-        box.append(el('div', { class: 'eyebrow', style: 'margin-bottom:8px', text: lbl }));
-        ['brand', 'error', 'success', 'neutral'].forEach(k => {
+        box.append(el('div', { class: 'label', style: 'margin-bottom:24px; font-size:16px', text: lbl }));
+        ['brand', 'error', 'success', 'neutral'].forEach((k, i) => {
           const r = set[k]; if (!r) return;
-          box.append(el('div', { class: 'ms mut', style: 'margin-top:32px; margin-bottom:16px', text: RAMP_LABEL[k] || k }));
+          box.append(el('div', { class: 'ms mut', style: (i === 0 ? '' : 'margin-top:32px; ') + 'margin-bottom:16px', text: RAMP_LABEL[k] || k }));
           box.append(stripFor(r, (RAMP_LABEL[k] || k) + ' ' + lbl));
         });
         ld.append(box);
