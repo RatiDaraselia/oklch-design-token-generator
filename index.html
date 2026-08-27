@@ -2886,7 +2886,7 @@
       function update(at, cheap) {
         const v = at === undefined ? cfg.get() : at, r = reach();
         const frac = (v - cfg.min) / Math.max(1e-9, r - cfg.min);
-        thumb.style.left = (frac * 100) + '%';
+        thumb.style.left = `calc(16px + ${frac} * (100% - 32px))`;
         num.value = fx(v, cfg.dec) + (cfg.unit || '');
         foot.textContent = cfg.foot ? '\u2012 ' + cfg.foot(v) : '';
         reachTrack.setAttribute('aria-valuenow', fx(v, cfg.dec));
@@ -2904,7 +2904,7 @@
       }
       const fromX = e => {
         const b = reachTrack.getBoundingClientRect();
-        return cfg.min + clamp((e.clientX - b.left) / b.width, 0, 1) * (reach() - cfg.min);
+        return cfg.min + clamp((e.clientX - b.left - 16) / Math.max(1, b.width - 32), 0, 1) * (reach() - cfg.min);
       };
 
       /* The handle chases the pointer instead of being pinned to it. Each frame
