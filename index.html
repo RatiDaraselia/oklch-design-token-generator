@@ -3359,13 +3359,8 @@
       tbl.append(tb);
       pv.append(el('div', { class: 'pvcard', style: 'background:' + surf + ';border-color:' + line }, [tbl]));
 
-      // black-on-black reads as nothing, so the dark preview lifts its toast with
-      // a light rim and a deeper cast, the same way the page's own buttons do
-      const toastLift = dark
-        ? '0 0 0 .5px rgb(255 255 255 / .07), 0 2px 4px rgb(0 0 0 / .5), 0 8px 20px rgb(0 0 0 / .35)'
-        : '0 1px 2px rgb(0 0 0 / .05), 0 4px 12px rgb(0 0 0 / .06)';
       pv.append(el('div', { class: 'row', style: 'justify-content:flex-end' }, [
-        el('div', { class: 'toast', style: 'background:' + g('success', tintFill) + ';border:1px solid ' + g('success', tintEdge) + ';box-shadow:' + toastLift }, [
+        el('div', { class: 'toast', style: 'background:' + g('success', tintFill) + ';border:1px solid ' + g('success', tintEdge) }, [
           el('span', { class: 'label', style: 'color:' + g('success', 800), text: 'System saved' }),
           el('span', { class: 'ms', style: 'color:' + g('success', 700), text: systemShape() })
         ])
