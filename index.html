@@ -492,7 +492,7 @@
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      transition: background var(--fast), border-color var(--fast), transform var(--fast)
+      transition: background var(--fast), border-color var(--fast), color var(--fast), transform var(--fast)
     }
 
     .btn:active {
@@ -539,6 +539,14 @@
       background: var(--bg-surface);
       color: var(--text-primary);
       box-shadow: 0 1px 2px rgb(0 0 0 / .04), 0 4px 12px rgb(0 0 0 / .04)
+    }
+
+    /* the segmented controls had no hover at all: an unselected option gave no
+       sign it was live until you clicked it */
+    @media (hover: hover) {
+      .seg button:not([aria-pressed="true"]):hover {
+        color: var(--text-primary)
+      }
     }
 
     .tabs {
@@ -1387,16 +1395,32 @@
         background: var(--n150)
       }
 
+      /* .btn.sec is already at --text-primary, so the only headroom left is the
+         far end of the neutral ramp. A smaller step than the others by
+         necessity, but it keeps every button responding rather than most. */
       .btn.sec:hover {
-        background: var(--bg-subtle)
+        background: var(--bg-subtle);
+        color: var(--n950)
       }
 
+      :root.dark .btn.sec:hover {
+        color: var(--n0)
+      }
+
+      /* Text has to move with the surface or the hover reads as half-finished.
+         Everything that sits at --text-secondary steps up to --text-primary,
+         which is the same move .iconbtn and .themebtn already make. Note this
+         is a contrast increase, not a lightness increase: primary is darker
+         than secondary in light and lighter in dark. .btn.pri and .btn.sec are
+         left alone - their text is already at the end of the scale. */
       .btn.ghost:hover {
-        background: var(--bg-hover)
+        background: var(--bg-hover);
+        color: var(--text-primary)
       }
 
       .navitem:hover {
-        background: var(--bg-hover)
+        background: var(--bg-hover);
+        color: var(--text-primary)
       }
 
       .dis summary:hover {
@@ -1550,7 +1574,7 @@
       height: 32px; padding: 0 12px; border: 0; border-radius: 8px;
       background: var(--fig-sel); color: var(--fig-text); font-family: var(--font-sans);
       font-size: 13px; line-height: 13px; font-weight: 500; letter-spacing: -.26px;
-      transition: background var(--fast), box-shadow var(--fast), transform var(--fast);
+      transition: background var(--fast), box-shadow var(--fast), color var(--fast), transform var(--fast);
     }
     .fbtn svg { flex: none; display: block }
     .fbtn svg[width] { filter: saturate(0) opacity(0.6); transition: filter var(--fast) }
@@ -1683,10 +1707,15 @@
     }
 
     @media (hover: hover) {
-      .fbtn:hover { background: var(--fig-hover) }
+      /* --fig-value only differs from --fig-text in light; in dark the export
+         buttons already sit at full brightness, so this is a no-op there */
+      .fbtn:hover { background: var(--fig-hover); color: var(--fig-value) }
       .fbtn.outline:hover { background: transparent; box-shadow: inset 0 0 0 1px var(--border-hover) }
       .fbtn.solid:hover { background: var(--solid-hover) }
-      .side .navitem:hover { background: var(--fig-sel) }
+      /* .side .navitem re-colours to --fig-muted further down the sheet, which
+         ties with .navitem:hover on specificity and wins on order — so the
+         sidebar list needs the step spelled out against its own palette */
+      .side .navitem:hover { background: var(--fig-sel); color: var(--fig-value) }
     }
   
     /* ================= export code block — BoardUI docs code-card spec ================= */
@@ -1735,12 +1764,16 @@
       transition: color 200ms var(--ease-out)
     }
     .code .seg button[aria-pressed="true"] { color: var(--code-tab-sel); background: none; box-shadow: none }
+    /* the code card runs its own palette, so it needs its own target */
+    @media (hover: hover) {
+      .code .seg button:not([aria-pressed="true"]):hover { color: var(--code-tab-sel) }
+    }
 
     /* copy control — copy/check cross-fade */
     .codecopy {
       display: flex; align-items: center; justify-content: center; flex: none;
       width: 28px; height: 28px; margin-right: 4px; border-radius: 10px;
-      color: var(--code-icon); transition: background 150ms var(--ease-out)
+      color: var(--code-icon); transition: background 150ms var(--ease-out), color 150ms var(--ease-out)
     }
     .codecopy .ic {
       position: relative; display: inline-flex; align-items: center; justify-content: center;
@@ -1771,7 +1804,7 @@
     .code pre .st { color: var(--code-val) }
     .code pre .cm { color: var(--code-punc) }
 
-    @media (hover: hover) { .codecopy:hover { background: var(--code-hover) } }
+    @media (hover: hover) { .codecopy:hover { background: var(--code-hover); color: var(--code-tab-sel) } }
   
     /* long-form body copy */
     .prose p + p { margin-top: 16px }
