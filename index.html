@@ -34,15 +34,17 @@
       --a700: #1c58ab;
       --e50: #f4efee;
       --e100: #efdfdd;
+      /* the 600s carry body text on their own 50 surface, so they are pinned at
+         4.5:1 against it — w and s were a touch under before they had a user */
       --e600: #ca252d;
       --e700: #a22528;
       --w50: #f4efea;
       --w100: #efe1ce;
-      --w600: #93661c;
+      --w600: #906419;
       --w700: #76531c;
       --s50: #e8f4e9;
       --s100: #c6f0cb;
-      --s600: #21863c;
+      --s600: #157e35;
       --s700: #216c33;
 
       --bg-page: #ffffff;
@@ -90,12 +92,18 @@
       --swatch-ring: transparent;
       --e50: #2a1a1a;
       --e100: #3a1f21;
+      /* the 600s were missing here, so anything reaching for one in dark got the
+         light value. Derived by mirroring the light 700->600 step (+.075 L) in
+         the direction these inverted ramps run, i.e. back toward the surface. */
+      --e600: #cf7376;
       --e700: #e88a8c;
       --w50: #241d14;
       --w100: #33281a;
+      --w600: #c39c61;
       --w700: #dcb478;
       --s50: #132218;
       --s100: #1b3324;
+      --s600: #77bf8b;
       --s700: #8fd7a2;
     }
 
@@ -1112,18 +1120,21 @@
       color: var(--text-secondary)
     }
 
-    /* A tinted card with neutral type reads as half-coloured. The 700s carry
-       the text as well as the glyph — they are the only rung of these families
-       the dark theme redefines, so they are also the only ones safe to use in
-       a themed surface. Weight still separates title from body. */
+    /* A tinted card with neutral type reads as half-coloured, so the type takes
+       the family too — but at two rungs, the way an info card runs primary over
+       secondary. 700 carries the glyph and title, 600 the body: a step toward
+       the surface, which comes out lighter in light and dimmer in dark. */
     .ban.err { background: var(--e50) }
-    .ban.err svg, .ban.err .t, .ban.err .b { color: var(--e700) }
+    .ban.err svg, .ban.err .t { color: var(--e700) }
+    .ban.err .b { color: var(--e600) }
 
     .ban.warn { background: var(--w50) }
-    .ban.warn svg, .ban.warn .t, .ban.warn .b { color: var(--w700) }
+    .ban.warn svg, .ban.warn .t { color: var(--w700) }
+    .ban.warn .b { color: var(--w600) }
 
     .ban.ok { background: var(--s50) }
-    .ban.ok svg, .ban.ok .t, .ban.ok .b { color: var(--s700) }
+    .ban.ok svg, .ban.ok .t { color: var(--s700) }
+    .ban.ok .b { color: var(--s600) }
 
     .ban.info { background: var(--bg-subtle) }
     .ban.info svg { color: var(--text-primary) }
