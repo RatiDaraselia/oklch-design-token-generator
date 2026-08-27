@@ -375,6 +375,44 @@
       background: var(--text-muted)
     }
 
+    /* Both panels are taller than a laptop viewport, and macOS keeps overlay
+       scrollbars hidden until you actually scroll — so the content simply
+       stopped at the bottom edge with nothing to say more of it was down
+       there. Fade whichever edge still has content past it. */
+    .side::before,
+    .side::after,
+    .insp::before,
+    .insp::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      right: 0;
+      height: 40px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity var(--fast);
+      z-index: 1
+    }
+
+    .side::before,
+    .insp::before {
+      top: 0;
+      background: linear-gradient(to bottom, var(--fig-panel) 25%, transparent)
+    }
+
+    .side::after,
+    .insp::after {
+      bottom: 0;
+      background: linear-gradient(to top, var(--fig-panel) 25%, transparent)
+    }
+
+    .side[data-above="1"]::before,
+    .insp[data-above="1"]::before,
+    .side[data-below="1"]::after,
+    .insp[data-below="1"]::after {
+      opacity: 1
+    }
+
     main {
       display: flex;
       justify-content: center;
@@ -1392,6 +1430,15 @@
       .insp[data-open="0"] {
         max-height: 44px;
         overflow: hidden
+      }
+
+      /* the inspector is a bottom sheet down here, on a different surface */
+      .insp::before {
+        background: linear-gradient(to bottom, var(--bg-subtle) 25%, transparent)
+      }
+
+      .insp::after {
+        background: linear-gradient(to top, var(--bg-subtle) 25%, transparent)
       }
 
       main {
@@ -3791,6 +3838,27 @@
     }
     inspToggle.addEventListener('click', () => { const i = $('#insp'); i.dataset.open = i.dataset.open === '1' ? '0' : '1'; });
     addEventListener('resize', checkNarrow);
+
+    /* panel edge fades — see the .side::after rule for why they exist.
+       A ResizeObserver on the scroller and on its content wrapper covers both
+       ways the answer can change: the viewport resizing, and a render growing
+       or shrinking the list inside. */
+    (function panelEdges() {
+      const panels = [['#side', '.side-scroll'], ['#insp', '.insp-scroll']]
+        .map(([p, s]) => [$(p), $(p).querySelector(s)]);
+      const sync = () => panels.forEach(([panel, sc]) => {
+        panel.dataset.above = sc.scrollTop > 1 ? '1' : '0';
+        panel.dataset.below = sc.scrollHeight - sc.clientHeight - sc.scrollTop > 1 ? '1' : '0';
+      });
+      const ro = new ResizeObserver(sync);
+      panels.forEach(([, sc]) => {
+        sc.addEventListener('scroll', sync, { passive: true });
+        ro.observe(sc);
+        for (const child of sc.children) ro.observe(child);
+      });
+      addEventListener('resize', sync, { passive: true });
+      sync();
+    })();
 
     /* ========================= 13. boot + math self-test ========================= */
     loadState();
