@@ -2678,27 +2678,12 @@
           });
         }
       }
-      // CVD survival — error vs success under deuteranopia
-      let moved = 0;
-      const hexOf = r => oklchToHex(out[r].L, out[r].C, out[r].H);
-      while (dEOK(simulate(hexOf('error'), 'deut'), simulate(hexOf('success'), 'deut')) < 0.10 && moved < 14) {
-        out.error.L = clamp(out.error.L - 0.01, 0.30, 0.9);
-        out.success.L = clamp(out.success.L + 0.01, 0.30, 0.9);
-        moved++;
-        if (Math.abs(out.error.L - out.success.L) >= 0.12 &&
-          dEOK(simulate(hexOf('error'), 'deut'), simulate(hexOf('success'), 'deut')) >= 0.10) break;
-      }
-      if (moved) {
-        ['error', 'success'].forEach(r => out[r].C = S_intensity() * maxChroma(out[r].L, out[r].H));
-        notes.push({
-          kind: 'warn', t: 'Error and success collided under deuteranopia',
-          b: 'Error was darkened by ' + (moved / 100).toFixed(2) + ' L and success lightened by the same, to hold them ' +
-            Math.abs(out.error.L - out.success.L).toFixed(2) + ' L apart.'
-        });
-      }
+      /* Deuteranopia survival used to be enforced here, by moving these anchors'
+         lightness apart. makeRamp reads only baseH, so that gap never reached a
+         stop and the check was passing on colours the system does not emit. It
+         now runs in build() against the generated ramps. */
       return out;
     }
-    const S_intensity = () => MODEL ? MODEL.intensity : 0.9;
 
     let MODEL = null;
     function build() {
@@ -2712,19 +2697,91 @@
       MODEL.ramps.brand = makeRamp('brand', brand.H);
       const sem = deriveSemantics(brand, intensity, lift, notes);
       MODEL.sem = sem;
+      const ROLES = ['error', 'warning', 'success', 'info'];
+
+      /* Rotation can only separate roles that have chroma to rotate. An
+         achromatic seed puts intensity at 0, where every hue resolves to the
+         same grey — deriveSemantics spins its distinctness guard out for
+         nothing and all four roles ship identical hex at every stop. Give the
+         semantic ramps only as much chroma as it takes to clear the same
+         ΔEOK 0.10 the roles are held to elsewhere. Brand and neutrals keep the
+         seed's own intensity, so a grey brand still yields a grey brand. */
+      const midL = LADDER[STEPS.indexOf(500)];
+      const roleMid = (r, ints) => {
+        const H = sem[r].H, cap = maxChroma(midL, H);
+        return oklchToHex(midL, clamp(ints * envelopeAt(midL) * cap, 0, cap), H);
+      };
+      const rolesCollide = ints => ROLES.some((r, i) =>
+        ROLES.slice(0, i).some(q => dEOK(roleMid(r, ints), roleMid(q, ints)) < 0.10));
+      let semIntensity = intensity;
+      while (semIntensity < 0.9 && rolesCollide(semIntensity)) semIntensity = Math.min(0.9, semIntensity + 0.02);
+      if (semIntensity > intensity + 1e-9) {
+        ROLES.forEach(r => sem[r].C = semIntensity * maxChroma(sem[r].L, sem[r].H));
+        notes.push({
+          kind: 'warn', t: 'Semantic roles were given chroma of their own',
+          b: 'The brand holds ' + fx(intensity * 100, 1) + '% of its hue\u2019s ceiling, too little for the four roles '
+            + 'to differ — rotating hue does nothing to a grey. Semantic intensity was raised to '
+            + fx(semIntensity * 100, 1) + '% so the roles clear ΔEOK 0.10. Brand and neutrals keep the seed\u2019s intensity.'
+        });
+      }
+
+      ROLES.forEach(r => { MODEL.ramps[r] = makeRamp(r, sem[r].H, { intensity: semIntensity }); });
+
+      /* Deuteranopia separation, measured on the stops that actually ship. This
+         used to run in deriveSemantics against the role anchors, moving their
+         lightness apart — but makeRamp reads only baseH, so both roles still
+         reached every step at the shared ladder's lightness and differed only in
+         the red/green channel deuteranopia collapses. The guard passed on colours
+         that were never emitted. Walk the two ramps apart in lightness instead,
+         the same way the 600 stop below leaves the ladder when it misses 4.5:1. */
+      /* Only error moves, and only downward. Splitting the walk between the two
+         lightens success, which costs it contrast against its own 50 and leaves
+         the 600 stop short of 4.5:1; darkening error buys separation and pays
+         its own legibility back at the same time. So success keeps the shared
+         ladder exactly and error is the single ramp that steps off it. */
+      const deutAt = shift => {
+        const e = at(MODEL.ramps.error, 500), sc = at(MODEL.ramps.success, 500);
+        const L = clamp(e.L - shift, 0.20, 0.95);
+        return dEOK(simulate(oklchToHex(L, clamp(e.C, 0, maxChroma(L, e.H)), e.H), 'deut'),
+          simulate(sc.hex, 'deut'));
+      };
+      let deutShift = 0;
+      while (deutShift < 0.25 && deutAt(deutShift) < 0.10) deutShift += 0.01;
+      if (deutShift > 0) {
+        MODEL.ramps.error.stops = MODEL.ramps.error.stops.map(st => {
+          if (st.locked) return st;
+          const L = clamp(st.L - deutShift, 0.05, 0.99);
+          const C = clamp(st.C, 0, maxChroma(L, st.H));
+          return { step: st.step, L, C, H: st.H, hex: oklchToHex(L, C, st.H), locked: false };
+        });
+        const got = dEOK(simulate(at(MODEL.ramps.error, 500).hex, 'deut'),
+          simulate(at(MODEL.ramps.success, 500).hex, 'deut'));
+        notes.push({
+          kind: 'warn', t: 'Error and success collided under deuteranopia',
+          b: 'At one shared lightness the two read as the same colour to a deuteranope. The error ramp was walked '
+            + fx(deutShift, 2) + ' L darker, off the shared ladder, leaving the two 500 stops ΔEOK '
+            + fx(got, 3) + ' apart under simulation. Success keeps the ladder.'
+        });
+      }
+
+      // role legibility: 600 vs 50 ≥ 4.5:1 — run after the deuteranopia walk, so
+      // the guarantee holds at the lightness the stops actually ship at
       const fixes = [];
-      ['error', 'warning', 'success', 'info'].forEach(r => {
-        MODEL.ramps[r] = makeRamp(r, sem[r].H);
-        // role legibility: 600 vs 50 ≥ 4.5:1
+      ROLES.forEach(r => {
         const idx = STEPS.indexOf(600), s50 = MODEL.ramps[r].stops[0];
+        // the walk may not pass the 700 stop: a ramp that stops descending is no
+        // longer a ladder, and every reader of it assumes lightness only falls
+        const floorL = MODEL.ramps[r].stops[STEPS.indexOf(700)].L + 0.005;
         let st = MODEL.ramps[r].stops[idx], walked = 0;
-        while (contrast(st.hex, s50.hex) < 4.5 && walked < 30 && !st.locked) {
+        while (contrast(st.hex, s50.hex) < 4.5 && walked < 30 && !st.locked && st.L - 0.01 >= floorL) {
           const L = st.L - 0.01, H = st.H, C = clamp(st.C, 0, maxChroma(L, H));
           st = { step: 600, L, C, H, hex: oklchToHex(L, C, H), locked: false }; walked++;
         }
         if (walked) {
           MODEL.ramps[r].stops[idx] = st;
-          fixes.push(r + ' by ' + fx(walked / 100, 2) + ' L to ' + fx(contrast(st.hex, s50.hex), 2) + ':1');
+          const got = contrast(st.hex, s50.hex);
+          fixes.push(r + ' by ' + fx(walked / 100, 2) + ' L to ' + fx(got, 2) + ':1'
+            + (got < 4.5 ? ' (as far as the 700 stop allows)' : ''));
         }
       });
       if (fixes.length) notes.push({
@@ -2748,7 +2805,8 @@
       });
 
       ['brand', 'error', 'warning', 'success', 'info'].forEach(k =>
-        MODEL.dark[k] = makeRamp(k + '-dark', MODEL.ramps[k].baseH, { dark: true }));
+        MODEL.dark[k] = makeRamp(k + '-dark', MODEL.ramps[k].baseH,
+          k === 'brand' ? { dark: true } : { dark: true, intensity: semIntensity }));
       MODEL.dark.neutral = makeRamp('neutral-dark', brand.H, { dark: true, tintPct: tint == null ? 0 : tint * 1.5 });
       return MODEL;
     }
