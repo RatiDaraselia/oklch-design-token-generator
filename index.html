@@ -2748,9 +2748,17 @@
       let deutShift = 0;
       while (deutShift < 0.25 && deutAt(deutShift) < 0.10) deutShift += 0.01;
       if (deutShift > 0) {
-        MODEL.ramps.error.stops = MODEL.ramps.error.stops.map(st => {
+        /* Taper the walk to nothing at both ends of the ladder. Shifting every
+           stop by the same amount drags 50 and 100 down with the rest, and an
+           error tint at L 0.86 is not a tint — it reads as dirty grey beside
+           warning's and success's near-white 50s. The separation only means
+           anything where the two are used as solid status colours: a pale wash
+           is a background, and two pale washes sit close under simulation no
+           matter what we do to them. Full shift across 300-700, none at 50/950. */
+        const taper = i => clamp(Math.min(i, 10 - i) / 3, 0, 1);
+        MODEL.ramps.error.stops = MODEL.ramps.error.stops.map((st, i) => {
           if (st.locked) return st;
-          const L = clamp(st.L - deutShift, 0.05, 0.99);
+          const L = clamp(st.L - deutShift * taper(i), 0.05, 0.99);
           const C = clamp(st.C, 0, maxChroma(L, st.H));
           return { step: st.step, L, C, H: st.H, hex: oklchToHex(L, C, st.H), locked: false };
         });
@@ -2759,8 +2767,8 @@
         notes.push({
           kind: 'warn', t: 'Error and success collided under deuteranopia',
           b: 'At one shared lightness the two read as the same colour to a deuteranope. The error ramp was walked '
-            + fx(deutShift, 2) + ' L darker, off the shared ladder, leaving the two 500 stops ΔEOK '
-            + fx(got, 3) + ' apart under simulation. Success keeps the ladder.'
+            + fx(deutShift, 2) + ' L darker through its middle, easing back onto the ladder at 50 and 950 so the tints '
+            + 'stay tints, leaving the two 500 stops ΔEOK ' + fx(got, 3) + ' apart under simulation. Success keeps the ladder.'
         });
       }
 
