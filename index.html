@@ -1062,35 +1062,48 @@
 
     /* banner */
     .ban {
-      display: flex;
-      gap: 8px;
       padding: 16px;
       border-radius: 10px;
-      align-items: flex-start;
       margin-top: 8px
     }
 
-    .ban > span {
+    /* same disclosure idiom as .dis further down: a chevron that points right
+       when shut and turns a quarter when open, rather than swapping glyphs */
+    .ban summary {
+      cursor: pointer;
+      list-style: none;
       display: flex;
       align-items: center;
-      height: 20px;
-      flex: none
-    }
-
-    .ban > div {
-      display: flex;
-      flex-direction: column;
       gap: 8px
     }
 
+    .ban summary::-webkit-details-marker {
+      display: none
+    }
+
     .ban .t {
+      flex: 1;
+      min-width: 0;
       font-size: 13px;
       font-weight: 500;
       line-height: 20px;
       color: var(--text-primary)
     }
 
+    .ban .mk {
+      display: flex;
+      flex: none;
+      transition: transform var(--med)
+    }
+
+    .ban[open] .mk {
+      transform: rotate(90deg)
+    }
+
     .ban .b {
+      /* indent past the leading glyph so the body hangs off the title, not the card */
+      margin-top: 8px;
+      padding-left: 24px;
       font-size: 13px;
       color: var(--text-secondary)
     }
@@ -1923,8 +1936,8 @@
     .vramp .acts > span { display: flex; align-items: center; justify-content: center;
       width: 20px; height: 20px; border-radius: 6px; cursor: pointer; color: inherit }
     .vramp .acts svg { width: 15px; height: 15px; display: block }
-    .ban > span { display: flex; flex: none }
     .ban svg { width: 16px; height: 16px; display: block }
+    .ban .mk svg { width: 14px; height: 14px }
     .strip .stop .lk svg { width: 14px; height: 14px; display: block }
     @media (hover: hover) { .vramp .acts > span:hover { background: rgb(0 0 0 / .08) } }
   
@@ -3143,8 +3156,19 @@
       // the glyph has to say the same thing the surface does — an info circle on
       // an amber card read as a note about nothing in particular
       const glyph = cls === 'warn' || cls === 'err' ? ICON.alert : cls === 'ok' ? ICON.check : ICON.info;
-      return el('div', { class: 'ban ' + cls }, [el('span', { html: glyph }),
-      el('div', {}, [el('div', { class: 't', text: n.t }), el('div', { class: 'b', text: n.b })])]);
+      /* Anything that might want a decision opens itself; the routine reports
+         stay folded, so a regeneration that corrected four things reads as four
+         headlines rather than four paragraphs. The title carries the finding
+         either way — the body is only ever the arithmetic behind it. */
+      const loud = cls === 'warn' || cls === 'err';
+      return el('details', { class: 'ban ' + cls, open: loud ? '' : null }, [
+        el('summary', {}, [
+          el('span', { class: 'bi', html: glyph }),
+          el('span', { class: 't', text: n.t }),
+          el('span', { class: 'mk', html: BX.chevronRight })
+        ]),
+        el('div', { class: 'b', text: n.b })
+      ]);
     }
     function rampBlock(ramp, title, sub) {
       const wrap = el('div', { style: 'margin-top:32px' });
