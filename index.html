@@ -3328,8 +3328,7 @@
           : 'background:' + surf + ';border-color:' + line + ';color:' + tx, text: label
       });
 
-      pv.append(el('div', { class: 'row', style: 'gap:8px;flex-wrap:wrap' }, [btn('Save changes', 'pri'), btn('Cancel', 'sec'),
-      el('span', { class: 'ms', style: 'color:' + tx2, text: 'Buttons stay neutral; only status and data carry color.' })]));
+
 
       pv.append(el('div', { class: 'pvcard', style: 'background:' + surf + ';border-color:' + line }, [
         el('div', { class: 'label', text: 'Invite a teammate' }),
@@ -3360,7 +3359,8 @@
       tbl.append(tb);
       pv.append(el('div', { class: 'pvcard', style: 'background:' + surf + ';border-color:' + line }, [tbl]));
 
-      pv.append(el('div', { class: 'row', style: 'justify-content:flex-end' }, [
+      pv.append(el('div', { class: 'row', style: 'justify-content:space-between;align-items:center' }, [
+        el('div', { class: 'row', style: 'gap:8px' }, [btn('Save changes', 'pri'), btn('Cancel', 'sec')]),
         el('div', { class: 'toast', style: 'background:' + g('success', tintFill) }, [
           el('span', { html: ICON.check, style: 'color:' + g('success', 700) + ';display:flex;width:16px;height:16px' }),
           el('span', { class: 'label', style: 'color:' + g('success', 700), text: 'System saved' })
