@@ -1214,27 +1214,6 @@
       border-top: 1px solid
     }
 
-    .pv .chart {
-      display: flex;
-      align-items: flex-end;
-      gap: 16px;
-      height: 120px;
-      padding-top: 8px
-    }
-
-    .pv .grp {
-      display: flex;
-      align-items: flex-end;
-      gap: 3px;
-      flex: 1;
-      height: 100%
-    }
-
-    .pv .bar {
-      flex: 1;
-      border-radius: 3px 3px 0 0
-    }
-
     .pv .fld {
       display: grid;
       gap: 6px
@@ -3322,7 +3301,26 @@
 
       // One step ladder for both themes: the dark ramps are generated inverted,
       // so 200 is the tint and 800 the readable ink in light *and* dark.
-      const pill = (role, label) => el('span', { class: 'pill', style: 'background:' + g(role, 200) + ';color:' + g(role, 800), text: label });
+      // Tinted surfaces sit a rung lighter than the obvious choice, so the ink
+      // and not the fill carries the status. The step number can't be shared
+      // across themes, or even across backdrops inside one theme.
+      //
+      // Banner and toast sit on the page. The dark page (#141414) is nearer the
+      // foot of the ramp than #ffffff is to its head, so step 50 there lands on
+      // the page at 1.00 and the fill vanishes. Light 50 and dark 100 both
+      // measure 1.09, so those pair.
+      //
+      // Pills sit on the card, which in dark is neutral-200, not the page.
+      // Against that the role ramp isn't monotonic: role-200 matches the card
+      // to 1.00-1.03, which is what left the old dark pills with no fill at all.
+      // Dark 50 gives 1.26 and pairs with light 100 at 1.22.
+      //
+      // Either way the tint lands slightly darker than whatever it sits on.
+      const tintFill = dark ? 100 : 50;    // banner + toast, against the page
+      const tintEdge = dark ? 200 : 100;   // their hairline
+      const pillFill = dark ? 50 : 100;    // pills, against the card
+
+      const pill = (role, label) => el('span', { class: 'pill', style: 'background:' + g(role, pillFill) + ';color:' + g(role, 800), text: label });
       const btn = (label, kind) => el('span', {
         class: 'pbtn', style: kind === 'pri'
           ? 'background:' + (dark ? at(N, 950).hex : at(N, 900).hex) + ';color:' + (dark ? at(N, 50).hex : '#ffffff')
@@ -3341,7 +3339,7 @@
         ])
       ]));
 
-      pv.append(el('div', { style: 'background:' + g('warning', 100) + ';border:1px solid ' + g('warning', 200) + ';border-radius:8px;padding:12px 16px' }, [
+      pv.append(el('div', { style: 'background:' + g('warning', tintFill) + ';border:1px solid ' + g('warning', tintEdge) + ';border-radius:8px;padding:12px 16px' }, [
         el('div', { class: 'label', style: 'color:' + g('warning', 800), text: 'Seats are nearly full' }),
         el('div', { class: 'ms', style: 'color:' + g('warning', 700), text: 'Two seats left on the current plan.' })
       ]));
@@ -3361,24 +3359,13 @@
       tbl.append(tb);
       pv.append(el('div', { class: 'pvcard', style: 'background:' + surf + ';border-color:' + line }, [tbl]));
 
-      const chart = el('div', { class: 'chart' });
-      const series = [g('brand', 500), g('info', 500), g('success', 500), g('warning', 500)];
-      [[62, 40, 78, 30], [48, 72, 36, 58], [80, 52, 44, 66], [34, 64, 70, 42], [70, 38, 56, 74], [52, 80, 30, 48]].forEach(grp => {
-        const gd = el('div', { class: 'grp' });
-        grp.forEach((v, i) => gd.append(el('div', { class: 'bar', style: 'height:' + v + '%;background:' + series[i] })));
-        chart.append(gd);
-      });
-      pv.append(el('div', { class: 'pvcard', style: 'background:' + surf + ';border-color:' + line }, [
-        el('div', { class: 'label', text: 'Runs per day' }),
-        el('div', { class: 'ms', style: 'color:' + tx2 + ';margin-top:2px', text: 'Four series from the generated system.' }), chart]));
-
       // black-on-black reads as nothing, so the dark preview lifts its toast with
       // a light rim and a deeper cast, the same way the page's own buttons do
       const toastLift = dark
         ? '0 0 0 .5px rgb(255 255 255 / .07), 0 2px 4px rgb(0 0 0 / .5), 0 8px 20px rgb(0 0 0 / .35)'
         : '0 1px 2px rgb(0 0 0 / .05), 0 4px 12px rgb(0 0 0 / .06)';
       pv.append(el('div', { class: 'row', style: 'justify-content:flex-end' }, [
-        el('div', { class: 'toast', style: 'background:' + g('success', 100) + ';border:1px solid ' + g('success', 200) + ';box-shadow:' + toastLift }, [
+        el('div', { class: 'toast', style: 'background:' + g('success', tintFill) + ';border:1px solid ' + g('success', tintEdge) + ';box-shadow:' + toastLift }, [
           el('span', { class: 'label', style: 'color:' + g('success', 800), text: 'System saved' }),
           el('span', { class: 'ms', style: 'color:' + g('success', 700), text: systemShape() })
         ])
