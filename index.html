@@ -1231,10 +1231,10 @@
 
     .pv .toast {
       border-radius: 999px;
-      padding: 10px 14px;
+      padding: 10px 14px 10px 16px;
       font-size: 13px;
       display: flex;
-      gap: 8px;
+      gap: 6px;
       align-items: center
       /* shadow is set inline: it has to follow the *previewed* theme, not the
          page's, so a dark preview on a light page gets a dark-theme shadow */
@@ -3363,7 +3363,7 @@
       pv.append(el('div', { class: 'row', style: 'justify-content:flex-end' }, [
         el('div', { class: 'toast', style: 'background:' + g('success', tintFill) }, [
           el('span', { html: ICON.check, style: 'color:' + g('success', 700) + ';display:flex;width:16px;height:16px' }),
-          el('span', { class: 'label', style: 'color:' + g('success', 800), text: 'System saved' })
+          el('span', { class: 'label', style: 'color:' + g('success', 700), text: 'System saved' })
         ])
       ]));
       host.append(pv);
