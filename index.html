@@ -2034,10 +2034,15 @@
     .sl .thumb {
       box-shadow: var(--thumb-lift);
       transform: translate(-50%, -50%) scale(1);
+      /* The rail stretch rides on the independent `translate` property rather
+         than being folded into `transform`. translate is applied before
+         transform, so the two compose without the physics having to know or
+         restate whatever scale the hover and grab states are running. */
+      translate: 0;
       /* `left` eases so a click on the bar, a keyboard step and a brand-driven
          re-render all glide instead of teleporting; the tracking rule below
          drops it again once the pointer is genuinely dragging */
-      transition: left var(--med), transform var(--fast), box-shadow var(--fast)
+      transition: left var(--med), translate var(--med), transform var(--fast), box-shadow var(--fast)
     }
     @media (hover: hover) {
       .sl .track:hover .thumb { transform: translate(-50%, -50%) scale(1.15); box-shadow: var(--thumb-lift-hover) }
@@ -2056,6 +2061,9 @@
        would leave the handle trailing the cursor. A plain click never sets it,
        so the handle glides to where you clicked. */
     .sl[data-track="1"] .thumb {
+      /* left and translate are both driven per frame while the integrator runs,
+         so neither may ease — easing a position that is already being animated
+         leaves the handle trailing its own physics */
       transition: transform var(--fast), box-shadow var(--fast)
     }
   </style>
@@ -2983,7 +2991,7 @@
         const atEnd = c <= cfg.min || c >= r;
         if (atEnd && !wasAtEnd) haptic(12);
         wasAtEnd = atEnd;
-        cfg.set(c); update(c, springRaf !== null); render(false);
+        cfg.set(c); update(c, physRaf !== null); render(false);
       };
       reachTrack.style.border = '0.5px solid var(--fig-border)';   // constant, set once
       /* `at` is the authoritative value to paint. The spring passes the position
@@ -3018,65 +3026,130 @@
         return cfg.min + clamp((e.clientX - b.left - 16) / Math.max(1, b.width - 32), 0, 1) * (reach() - cfg.min);
       };
 
-      /* The handle chases the pointer instead of being pinned to it. Each frame
-         it closes a fixed *fraction* of the remaining gap, which is what gives
-         the weight — fast while far away, easing as it arrives, never a hard
-         stop. Deliberately critically damped with no release momentum: a colour
-         slider that coasted past where you let go would land you on a different
-         colour than the one you aimed at. */
-      const FOLLOW = 22;                  // 1/s, ~45ms time constant
-      let target = null, springRaf = null, springSafety = null;
-      /* `pos` is the spring's own position. It cannot integrate on cfg.get():
-         these sliders set state (S.*) but read a derived model (MODEL.*) that
-         only catches up when build() runs on the next frame, so feeding back on
-         get() would integrate a stale value and stutter. */
-      let pos = null, lastT = 0, holding = false, trackW = 1;
-      // half a pixel of travel, expressed in this slider's own units
-      const settled = d => Math.abs(d) <= (reach() - cfg.min) / trackW * 0.5;
+      /* The handle is treated as an object with mass rather than a value that
+         follows a cursor. Three behaviours, one integrator:
+
+         drag    it chases the pointer, closing a fixed fraction of the gap each
+                 frame — fast when far, easing as it arrives.
+         glide   on release it keeps the speed it actually had and coasts down
+                 under friction, the way something slid across a table does.
+         rail    past either end it does not stop dead. The value clamps, but the
+                 handle keeps going into a spring that stretches, stiffens and
+                 pulls it back.
+
+         Everything below is in this slider's own units per second, so the same
+         constants feel identical on a 0-1 lightness track and a 0-360 hue one.
+         The rail spring is scale-free for the same reason: excess and velocity
+         are both value-space, so the ratio that sets the damping is unitless. */
+      const FOLLOW = 22;        // 1/s   — pointer chase, ~45ms time constant
+      const FRICTION = 6.5;     // 1/s   — coast decay; a flick travels v0/FRICTION
+      const EDGE_K = 260;       // 1/s^2 — rail spring
+      const EDGE_C = 32;        // 1/s   — rail damping, ~2*sqrt(EDGE_K) so it
+                                //         returns without bouncing back out
+      const MAXOVER = 22;       // px    — asymptote of the stretch, never exceeded
+      const FLICK_MIN = 40;     // px/s  — below this a release just settles
+      const REST_VEL = 6;       // px/s  — and below this the whole thing stops
+      const REST_OVER = 0.3;    // px
+
+      let target = null, physRaf = null, safety = null;
+      /* `pos` is the integrator's own position, and it is deliberately allowed
+         outside [min, reach] — that excess *is* the rubber band. It cannot
+         integrate on cfg.get(): these sliders set state (S.*) but read a derived
+         model (MODEL.*) that only catches up when build() runs on the next
+         frame, so feeding back on get() would integrate a stale value. */
+      let pos = null, vel = 0, lastT = 0, holding = false, trackW = 1;
+      let mode = 'idle';
+
+      // travel, not track width: `left` runs 16px..width-16px
+      const travel = () => Math.max(1, reachTrack.getBoundingClientRect().width - 32);
+      const pxPerV = () => trackW / Math.max(1e-9, reach() - cfg.min);
+
+      /* Progressive resistance, so the stretch can never run away however far the
+         pointer goes: the first pixels past the rail come nearly free and each
+         one after costs more, approaching MAXOVER but never reaching it. */
+      const rubberPx = exPx => MAXOVER * (1 - Math.exp(-Math.abs(exPx) / MAXOVER)) * Math.sign(exPx);
+      const rubberV = raw => {
+        const c = clamp(raw, cfg.min, reach()), ex = raw - c;
+        return ex ? c + rubberPx(ex * pxPerV()) / pxPerV() : raw;
+      };
+
+      const rawFromX = e => {
+        const b = reachTrack.getBoundingClientRect();
+        return cfg.min + ((e.clientX - b.left - 16) / Math.max(1, b.width - 32)) * (reach() - cfg.min);
+      };
+
+      function paint() {
+        const c = clamp(pos, cfg.min, reach()), ex = pos - c;
+        // the value never leaves its range; only the handle does
+        thumb.style.translate = ex ? rubberPx(ex * pxPerV()).toFixed(2) + 'px' : '';
+        setV(c);
+      }
 
       /* Single exit point, safe to call twice. rAF stops entirely in a
-         background tab, so cleanup can never be left to the spring alone —
+         background tab, so cleanup can never be left to the loop alone —
          a stranded `dragging` would throttle every render for the session. */
-      function stopSpring() {
-        if (springRaf) { cancelAnimationFrame(springRaf); springRaf = null; }
-        clearTimeout(springSafety); springSafety = null;
-        if (target !== null) setV(target);
+      function stopPhys() {
+        if (physRaf) { cancelAnimationFrame(physRaf); physRaf = null; }
+        clearTimeout(safety); safety = null;
+        mode = 'idle'; vel = 0;
+        if (pos !== null) setV(clamp(pos, cfg.min, reach()));
+        thumb.style.translate = '';
         pos = null;
         wrap.dataset.track = '0';
         if (!holding) { dragging = false; persist(); }
       }
 
-      function spring(now) {
-        // frame-rate independent, so 60Hz and 120Hz feel identical
-        // clamp both ends: a negative or wild delta (clock skew on tab restore)
-        // would otherwise blow exp() up and fling the handle to a rail
+      function tick(now) {
+        // frame-rate independent, so 60Hz and 120Hz feel identical. Clamp both
+        // ends: a negative or wild delta (clock skew on tab restore) would
+        // otherwise blow exp() up and fling the handle to a rail.
         const dt = Math.min(0.05, Math.max(0, (now - lastT) / 1000)) || 0.016;
         lastT = now;
-        const d = target - pos;
-        if (settled(d)) { springRaf = null; stopSpring(); return; }
-        pos += d * (1 - Math.exp(-FOLLOW * dt));
-        setV(pos);
-        springRaf = requestAnimationFrame(spring);
+        const lo = cfg.min, hi = reach();
+
+        if (mode === 'drag') {
+          const prev = pos;
+          pos += (target - pos) * (1 - Math.exp(-FOLLOW * dt));
+          // the handle's own speed, not the pointer's — this is what it keeps
+          vel = (pos - prev) / dt;
+        } else {
+          const ex = pos - clamp(pos, lo, hi);
+          // past a rail the spring takes over from friction entirely
+          if (ex) vel += (-EDGE_K * ex - EDGE_C * vel) * dt;
+          else vel *= Math.exp(-FRICTION * dt);
+          pos += vel * dt;
+        }
+
+        paint();
+
+        if (mode !== 'drag') {
+          const ppv = pxPerV();
+          const exPx = Math.abs(pos - clamp(pos, lo, hi)) * ppv;
+          if (Math.abs(vel) * ppv < REST_VEL && exPx < REST_OVER) { stopPhys(); return; }
+        }
+        physRaf = requestAnimationFrame(tick);
       }
-      const springTo = v => {
-        target = clamp(v, cfg.min, reach());
-        if (pos === null) pos = cfg.get();   // seed once, from the live value
-        if (springRaf) return;
+
+      const startPhys = () => {
+        if (physRaf) return;
         lastT = performance.now();
-        springRaf = requestAnimationFrame(spring);
+        physRaf = requestAnimationFrame(tick);
       };
 
       reachTrack.addEventListener('pointerdown', e => {
         reachTrack.setPointerCapture(e.pointerId);
         holding = true; dragging = true;
         wrap.dataset.drag = '1';
-        // the spring owns the position now, so the CSS `left` easing has to step
-        // aside or the two would compound into mush
+        // the integrator owns left and translate now, so the CSS easing on both
+        // has to step aside or the two would compound into mush
         wrap.dataset.track = '1';
-        trackW = Math.max(1, reachTrack.getBoundingClientRect().width);
+        trackW = travel();
         haptic(8);
-        springTo(fromX(e));
-        const mv = ev => springTo(fromX(ev));
+        if (pos === null) pos = cfg.get();
+        vel = 0; mode = 'drag';
+        target = rubberV(rawFromX(e));
+        startPhys();
+        const mv = ev => { target = rubberV(rawFromX(ev)); };
         const end = () => {
           holding = false; wrap.dataset.drag = '0';
           reachTrack.removeEventListener('pointermove', mv);
@@ -3084,12 +3157,14 @@
           // without this a cancelled pointer would leave `dragging` stuck true
           // and throttle every render for the rest of the session
           reachTrack.removeEventListener('pointercancel', end);
-          // let an in-flight spring coast to its target, but never depend on it
-          // finishing — a timer still fires when frames do not
-          if (springRaf) {
-            clearTimeout(springSafety);
-            springSafety = setTimeout(stopSpring, 600);
-          } else stopSpring();
+          mode = 'glide';
+          // a slow release is a placement, not a throw
+          if (Math.abs(vel) * pxPerV() < FLICK_MIN) vel = 0;
+          // let the coast finish, but never depend on it — a timer still fires
+          // when frames do not
+          clearTimeout(safety);
+          safety = setTimeout(stopPhys, 2000);
+          startPhys();
         };
         reachTrack.addEventListener('pointermove', mv);
         reachTrack.addEventListener('pointerup', end);
